@@ -1,0 +1,191 @@
+body, .auth-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #191919 60%, #232323 100%);
+  margin: 0;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 0px;
+  position: relative;
+  z-index: 2;
+}
+
+.auth-img-wrapper {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 190px;
+  max-width: 300px;
+  width: 250px;
+  z-index: 3;
+  height: 410px;
+  position: relative;
+  overflow: hidden;
+  margin-right: -40px;
+}
+
+.auth-girl-img {
+  width: 100%;
+  height: auto;
+  max-height: 410px;
+  object-fit: contain;
+  opacity: 0.98;
+  filter: drop-shadow(0 4px 24px #FFD54F77);
+  pointer-events: none;
+  user-select: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: relative;
+}
+
+.auth-container {
+  max-width: 400px;
+  min-width: 295px;
+  margin: 0 auto;
+  padding: 32px 24px 28px 24px;
+  background: rgba(210, 210, 210, 0.78);
+  backdrop-filter: blur(10px);
+  border-radius: 22px;
+  box-shadow: 0 8px 40px 0 #FFD54F22, 0 2px 14px #0009;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+  transition: box-shadow 0.2s;
+}
+
+.auth-container h2 {
+  margin-bottom: 24px;
+  color: #fff7c0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px #fb923c33;
+}
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.auth-container input {
+  padding: 13px 15px;
+  border: none;
+  border-radius: 11px;
+  font-size: 1.09rem;
+  background: #232323;
+  color: #fff9e0;
+  font-weight: 500;
+  outline: none;
+  margin-bottom: 0;
+  transition: box-shadow 0.18s, background 0.18s;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 0 0 1.5px #fb923c25;
+}
+.auth-container input:focus {
+  box-shadow: 0 0 0 2.5px #ffd54f88;
+  background: #191919;
+}
+.auth-container button[type="submit"] {
+  background: linear-gradient(90deg, #FFA726, #FFD54F);
+  color: #232323;
+  border: none;
+  border-radius: 13px;
+  padding: 15px 0;
+  font-size: 1.22rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 24px #FFD54F88, 0 1.5px 10px #fb923c88;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.18s, box-shadow 0.18s;
+  text-shadow: 0 2px 8px #fff3;
+}
+.auth-container button[type="submit"]:hover {
+  background: linear-gradient(90deg, #FFD54F, #FFA726);
+  box-shadow: 0 4px 36px #FFD54FAA, 0 2px 16px #fb923cAA;
+}
+.auth-container a, .auth-container a:visited {
+  color: #FFD54F;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.auth-container a:hover {
+  color: #FFA726;
+}
+.auth-container p {
+  font-size: 16px;
+  color: #fff7c0;
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+.auth-error, .error-msg {
+  color: #ff5b38;
+  background: #fff1ef;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 7px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+
+.auth-password-wrapper {
+  position: relative;
+}
+.show-hide-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #FFD54F;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+
+/* ------------ MOBILE VIEW FIX ------------ */
+@media (max-width: 900px) {
+  .auth-main {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 0;
+  }
+  .auth-img-wrapper {
+    min-width: 120px;
+    max-width: 170px;
+    width: 58vw;
+    justify-content: center;
+    margin: 0 auto;
+    overflow: hidden;
+    height: 205px;
+  }
+  .auth-girl-img {
+    max-height: 205px;
+    width: 100%;
+    margin: 0 auto 0 auto;
+    display: block;
+    opacity: 0.97;
+    object-fit: contain;
+    object-position: top center;
+  }
+  .auth-container {
+    margin: -75px auto 0 auto;
+    padding: 8vw 4vw 6vw 4vw;
+    min-width: 0;
+    max-width: 97vw;
+  }
+}

@@ -1,0 +1,109 @@
+.dashboard-mobile-bg {
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #131d27 60%, #233544 100%);
+  padding: 0;
+}
+.dashboard-mobile-main {
+  max-width: 430px;
+  margin: 0 auto;
+  background: rgba(26, 34, 48, 0.99);
+  border-radius: 18px;
+  box-shadow: 0 8px 40px #00000025;
+  padding: 0 0 26px 0;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+}
+.dashboard-header-row {
+  display: flex;
+  align-items: center;
+  padding: 19px 17px 0 17px;
+  gap: 14px;
+  justify-content: flex-start;
+}
+.menu-icon-btn {
+  background: #15232c;
+  border: none;
+  padding: 9px 11px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  margin-right: 13px;
+}
+.menu-icon-bar {
+  width: 23px;
+  height: 3px;
+  background: #ffe082;
+  border-radius: 4px;
+  display: block;
+}
+.dashboard-logo {
+  font-size: 1.1rem;
+  color: #ffeb3b;
+  font-weight: 700;
+}
+.dashboard-welcome {
+  text-align: left;
+  margin: 24px 0 0 18px;
+}
+.welcome-title {
+  color: #90caf9;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.user-email {
+  color: #fff;
+  font-size: 1.22rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.dashboard-balance {
+  margin: 20px 0 18px 18px;
+  color: #ffe082;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-align: left;
+}
+.balance-amount {
+  font-size: 1.28rem;
+  font-weight: 700;
+  color: #ffd600;
+  margin-left: 2px;
+}
+.dashboard-play-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 13px 15px 0 15px;
+}
+.dashboard-play-buttons button {
+  padding: 15px 0;
+  font-size: 1.09rem;
+  border: none;
+  border-radius: 13px;
+  background: linear-gradient(92deg, #2193b0 60%, #6dd5ed 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 16px #2193b052;
+  cursor: pointer;
+  margin-bottom: 3px;
+  transition: background 0.18s, box-shadow 0.23s;
+}
+.dashboard-play-buttons button:hover {
+  background: linear-gradient(92deg, #176e75 60%, #00838f 100%);
+  box-shadow: 0 2px 22px #00acc152;
+}
+@media (max-width: 600px) {
+  .dashboard-mobile-main {
+    max-width: 99vw;
+    border-radius: 11px;
+    padding: 0 0 13px 0;
+  }
+  .dashboard-welcome, .dashboard-balance {
+    margin-left: 12px;
+  }
+  .dashboard-header-row { padding-left: 9px; }
+  .dashboard-play-buttons { padding: 13px 3vw 0 3vw; }
+}
