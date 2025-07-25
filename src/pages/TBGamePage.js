@@ -10,7 +10,7 @@ const EN_TO_HI = {
   kite: 'पतंग', spinningTop: 'भंवरा', rose: 'गुलाब', butterfly: 'तितली', pigeon: 'कबूतर', rabbit: 'खरगोश'
 };
 
-const socket = io('https://tb-backend-1.onrender.com', {
+const socket = io('https://tb-backend-tnab.onrender.com', {
   transports: ['websocket'],
   reconnectionAttempts: 5,
   timeout: 20000,
