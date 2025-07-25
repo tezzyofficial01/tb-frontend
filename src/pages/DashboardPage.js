@@ -17,7 +17,7 @@ const IMAGE_LIST = [
   { name: 'rabbit', src: '/images/rabbit.png' }
 ];
 
-const socket = io('https://tb-backend-1.onrender.com', {
+const socket = io('https://tb-backend-tnab.onrender.com', {
   transports: ['websocket'],
   reconnectionAttempts: 5,
   timeout: 20000,
