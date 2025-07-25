@@ -14,7 +14,7 @@ const ResetPassword = () => {
     setLoading(true);
     setMsg('');
     try {
-      await axios.post(`https://tb-backend-1.onrender.com/api/auth/reset-password/${token}`, {
+      await axios.post(`https://tb-backend-tnab.onrender.com/api/auth/reset-password/${token}`, {
         newPassword
       });
       setMsg('Password reset successfully! Redirecting to login...');
