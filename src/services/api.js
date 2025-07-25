@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://tb-backend-1.onrender.com/api', // Production backend ka URL
+  baseURL: 'https://tb-backend-tnab.onrender.com/api', // Production backend ka URL
 });
 
 // Har request pe JWT token attach hoga
