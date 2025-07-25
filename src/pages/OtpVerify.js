@@ -24,7 +24,7 @@ const OtpVerify = () => {
       // API call
       const res = await axios.post(
         //  'http://localhost:5000/api/auth/verify-otp',
-        'https://tb-backend-1.onrender.com/api/auth/verify-otp',
+        'https://tb-backend-tnab.onrender.com/api/auth/verify-otp',
         { email, otp },
         { headers: { 'Content-Type': 'application/json' } }
       );
