@@ -11,7 +11,7 @@ const ForgotPassword = () => {
     setLoading(true);
     setMsg('');
     try {
-      await axios.post('https://tb-backend-1.onrender.com/api/auth/forgot-password', { email });
+      await axios.post('https://tb-backend-tnab.onrender.com/api/auth/forgot-password', { email });
       setMsg('Reset link sent to your email (check spam folder also).');
     } catch (err) {
       setMsg(err.response?.data?.message || 'Something went wrong. Try again.');
