@@ -19,7 +19,7 @@ const Login = () => {
     setLoading(true);
     try {
       const res = await axios.post(
-        'https://tb-backend-1.onrender.com/api/auth/login',
+        'https://tb-backend-tnab.onrender.com/api/auth/login',
         { email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
