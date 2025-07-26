@@ -6,7 +6,7 @@ import AdminSidebar from '../components/AdminSidebar';
 
 const EN_TO_HI = {
   umbrella: 'छतरी', football: 'फुटबॉल', sun: 'सूरज', diya: 'दीया', cow: 'गाय', bucket: 'बाल्टी',
-  kite: 'पतंग', spinningTop: 'भंवरा', rose: 'गुलाब', butterfly: 'तितली', pigeon: 'कबूतर', rabbit: 'खरगोश'
+  kite: 'पतंग', spinningtop: 'भंवरा', rose: 'गुलाब', butterfly: 'तितली', pigeon: 'कबूतर', rabbit: 'खरगोश'
 };
 
 const IMAGE_LIST = [
