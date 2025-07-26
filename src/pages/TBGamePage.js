@@ -7,7 +7,7 @@ import '../styles/game.css';
 
 const EN_TO_HI = {
   umbrella: 'छतरी', football: 'फुटबॉल', sun: 'सूरज', diya: 'दीया', cow: 'गाय', bucket: 'बाल्टी',
-  kite: 'पतंग', spinningTop: 'भंवरा', rose: 'गुलाब', butterfly: 'तितली', pigeon: 'कबूतर', rabbit: 'खरगोश'
+  kite: 'पतंग', spinningtop: 'भंवरा', rose: 'गुलाब', butterfly: 'तितली', pigeon: 'कबूतर', rabbit: 'खरगोश'
 };
 
 const socket = io('https://tb-backend-tnab.onrender.com', {
