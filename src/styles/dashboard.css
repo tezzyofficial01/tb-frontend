@@ -10,6 +10,7 @@
 .admin-dashboard-container h1 {
   text-align: center;
   margin-bottom: 1rem;
+ color: #ffffff;
 }
 
 /* Current Round Section */
@@ -84,7 +85,7 @@
 
 .last-wins-section h2 {
   margin-bottom: 0.75rem;
-  color: #333;
+ color: #ffffff;
 }
 
 .last-wins-list {
@@ -97,7 +98,7 @@
   padding: 0.5rem 0;
   border-bottom: 1px solid #e0e0e0;
   font-weight: 500;
-  color: #555;
+  color: #ffffff;
 }
 
 .last-wins-list li:last-child {
