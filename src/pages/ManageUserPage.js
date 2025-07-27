@@ -64,86 +64,90 @@ const ManageUserPage = () => {
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>Search Users</h2>
-      <input
-        type="text"
-        placeholder="Enter user ID or email"
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        style={{ marginRight: '0.5rem', padding: '0.5rem' }}
-      />
-      <button onClick={handleSearch}>Search</button>
+   <div style={{ padding: '2rem' }}>
+  <h2 style={{ color: '#fff' }}>Search Users</h2>
 
-      <h2 style={{ marginTop: '2rem' }}>Manage User Balances</h2>
-      <div style={{
-        background: '#fff',
-        borderRadius: 12,
-        boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
-        maxHeight: 320,
-        overflowY: 'auto',
-        marginBottom: 28
-      }}>
-        <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Balance</th>
-              <th>Amount</th>
-              <th>Actions</th>
-              <th>Referral Reward</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user._id}>
-                <td>{user.email}</td>
-                <td>₹{user.balance}</td>
-                <td>
-                  <input
-                    type="number"
-                    value={editAmounts[user._id] || ''}
-                    onChange={e => handleBalanceChange(user._id, e.target.value)}
-                    placeholder="₹"
-                    style={{ width: '80px', padding: '0.25rem' }}
-                  />
-                </td>
-                <td>
-                  <button onClick={() => updateBalance(user._id, true)}>Add</button>{' '}
-                  <button onClick={() => updateBalance(user._id, false)}>Minus</button>
-                </td>
-                <td>
-                  {(user.referrerId && !user.referralRewarded) ? (
-                    <button
-                      style={{
-                        background: '#22c55e',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 6,
-                        padding: '7px 16px',
-                        fontWeight: 700,
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => handleReward(user._id)}
-                    >
-                      Reward
-                    </button>
-                  ) : user.referralRewarded ? (
-                    <span style={{ color: "#16a34a", fontWeight: 600 }}>Rewarded</span>
-                  ) : (
-                    "-"
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div>
-        <b>Total Users:</b> {totalUsers} &nbsp; | &nbsp;
-        <b>Active (last 10 min):</b> {activeUsers}
-      </div>
-    </div>
+  <input
+    type="text"
+    placeholder="Enter user ID or email"
+    value={searchTerm}
+    onChange={e => setSearchTerm(e.target.value)}
+    style={{ marginRight: '0.5rem', padding: '0.5rem' }}
+  />
+  <button onClick={handleSearch}>Search</button>
+
+  <h2 style={{ marginTop: '2rem', color: '#fff' }}>Manage User Balances</h2>
+
+  <div style={{
+    background: '#fff',
+    borderRadius: 12,
+    boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
+    maxHeight: 320,
+    overflowY: 'auto',
+    marginBottom: 28
+  }}>
+    <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Balance</th>
+          <th>Amount</th>
+          <th>Actions</th>
+          <th>Referral Reward</th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map(user => (
+          <tr key={user._id}>
+            <td>{user.email}</td>
+            <td>₹{user.balance}</td>
+            <td>
+              <input
+                type="number"
+                value={editAmounts[user._id] || ''}
+                onChange={e => handleBalanceChange(user._id, e.target.value)}
+                placeholder="₹"
+                style={{ width: '80px', padding: '0.25rem' }}
+              />
+            </td>
+            <td>
+              <button onClick={() => updateBalance(user._id, true)}>Add</button>{' '}
+              <button onClick={() => updateBalance(user._id, false)}>Minus</button>
+            </td>
+            <td>
+              {(user.referrerId && !user.referralRewarded) ? (
+                <button
+                  style={{
+                    background: '#22c55e',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    padding: '7px 16px',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => handleReward(user._id)}
+                >
+                  Reward
+                </button>
+              ) : user.referralRewarded ? (
+                <span style={{ color: "#16a34a", fontWeight: 600 }}>Rewarded</span>
+              ) : (
+                "-"
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div style={{ color: '#fff' }}>
+    <b>Total Users:</b> {totalUsers} &nbsp; | &nbsp;
+    <b>Active (last 10 min):</b> {activeUsers}
+  </div>
+</div>
+
   );
 };
 
