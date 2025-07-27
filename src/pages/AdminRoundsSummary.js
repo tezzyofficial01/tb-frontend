@@ -59,7 +59,8 @@ const AdminRoundsSummary = () => {
   }, []);
 
   return (
-    <div style={{ padding: '2rem' }}>
+   <div style={{ padding: '2rem', color: '#fff' }}>
+
       <h2>Today Rounds Summary</h2>
       {loading && <p>Loading...</p>}
       <div style={{
