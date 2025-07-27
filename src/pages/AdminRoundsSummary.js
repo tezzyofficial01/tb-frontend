@@ -50,7 +50,6 @@ const AdminRoundsSummary = () => {
     fetchSummary();
     fetchProfit();
 
-    // Optional: auto-refresh every 30 sec
     const interval = setInterval(() => {
       fetchSummary();
       fetchProfit();
@@ -59,12 +58,14 @@ const AdminRoundsSummary = () => {
   }, []);
 
   return (
-   <div style={{ padding: '2rem', color: '#fff' }}>
-
+    <div style={{ padding: '2rem', color: '#fff' }}>
       <h2>Today Rounds Summary</h2>
       {loading && <p>Loading...</p>}
+
+      {/* 🔲 Table Section */}
       <div style={{
         background: '#fff',
+        color: '#000', // ✅ Table content in black
         borderRadius: 12,
         boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
         maxHeight: 400,
@@ -93,16 +94,27 @@ const AdminRoundsSummary = () => {
         </table>
       </div>
 
-      {/* ------- NEW: Profit & Payout Summary Section ------- */}
+      {/* 🔶 Summary Cards Section */}
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 30 }}>
         <div style={{
-          background: "#f3fff4", borderRadius: 14, padding: 22, minWidth: 240, boxShadow: "0 2px 12px #0001"
+          background: "#f3fff4",
+          color: "#000", // ✅ Text black in payout card
+          borderRadius: 14,
+          padding: 22,
+          minWidth: 240,
+          boxShadow: "0 2px 12px #0001"
         }}>
           <div style={{ color: "#888", marginBottom: 6 }}>आज का Total Payout</div>
           <div style={{ fontSize: 26, color: "#16a085", fontWeight: 700 }}>₹{summary.totalPayout}</div>
         </div>
+
         <div style={{
-          background: "#fff5ee", borderRadius: 14, padding: 22, minWidth: 240, boxShadow: "0 2px 12px #0001"
+          background: "#fff5ee",
+          color: "#000", // ✅ Text black in profit card
+          borderRadius: 14,
+          padding: 22,
+          minWidth: 240,
+          boxShadow: "0 2px 12px #0001"
         }}>
           <div style={{ color: "#888", marginBottom: 6 }}>आज का Company Profit</div>
           <div style={{ fontSize: 26, color: "#e67e22", fontWeight: 700 }}>₹{summary.profit}</div>
