@@ -31,19 +31,33 @@ const WhatsappSettingsPage = () => {
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>WhatsApp Number Settings</h2>
-      <div style={{ marginBottom: '1rem' }}>
-        <label>Deposit WhatsApp: </label>
-        <input value={deposit} onChange={e => setDeposit(e.target.value)} placeholder="Deposit Number" style={{ marginRight: 8 }} />
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <label>Withdraw WhatsApp: </label>
-        <input value={withdraw} onChange={e => setWithdraw(e.target.value)} placeholder="Withdraw Number" style={{ marginRight: 8 }} />
-      </div>
-      <button onClick={handleSave} disabled={loading}>Save</button>
-      <span style={{ marginLeft: 10, color: msg === 'Updated!' ? 'green' : 'red' }}>{msg}</span>
-    </div>
+   <div style={{ padding: '2rem' }}>
+  <h2 style={{ color: '#fff' }}>WhatsApp Number Settings</h2>
+
+  <div style={{ marginBottom: '1rem' }}>
+    <label style={{ color: '#fff' }}>Deposit WhatsApp: </label>
+    <input
+      value={deposit}
+      onChange={e => setDeposit(e.target.value)}
+      placeholder="Deposit Number"
+      style={{ marginRight: 8 }}
+    />
+  </div>
+
+  <div style={{ marginBottom: '1rem' }}>
+    <label style={{ color: '#fff' }}>Withdraw WhatsApp: </label>
+    <input
+      value={withdraw}
+      onChange={e => setWithdraw(e.target.value)}
+      placeholder="Withdraw Number"
+      style={{ marginRight: 8 }}
+    />
+  </div>
+
+  <button onClick={handleSave} disabled={loading}>Save</button>
+  <span style={{ marginLeft: 10, color: msg === 'Updated!' ? 'green' : 'red' }}>{msg}</span>
+</div>
+
   );
 };
 
