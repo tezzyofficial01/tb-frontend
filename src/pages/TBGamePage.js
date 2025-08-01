@@ -59,7 +59,7 @@ export default function TBGamePage() {
     setHistoryLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await api.get('/bets/history', {
+        const res = await api.get('/my-bet-history', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setHistory(Array.isArray(res.data) ? res.data : []);
