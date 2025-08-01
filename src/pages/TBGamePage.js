@@ -49,30 +49,6 @@ export default function TBGamePage() {
   const [loadingWins, setLoadingWins] = useState(true);
   const [winPopup, setWinPopup] = useState({ show: false, image: '', amount: 0 });
 
-  // 📜 Bet History popup state
-  const [showHistory, setShowHistory] = useState(false);
-  const [history, setHistory] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
-
-  // Fetch history function, same as dashboard
-  const fetchHistory = async () => {
-    setHistoryLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-        const res = await api.get('/bets/my-bet-history', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setHistory(Array.isArray(res.data) ? res.data : []);
-    } catch {
-      setHistory([]);
-    }
-    setHistoryLoading(false);
-  };
-
-  useEffect(() => {
-    if (showHistory) fetchHistory();
-  }, [showHistory]);
-
   useEffect(() => {
     let prevRound = -1;
     const fetchLiveState = async () => {
@@ -220,7 +196,7 @@ export default function TBGamePage() {
             background: 'none', border: 'none', fontSize: 30, cursor: 'pointer',
             marginRight: 6, color: '#ffe082', lineHeight: 1
           }}
-          onClick={() => setShowHistory(true)}
+          onClick={() => navigate('/bet-history')}
           aria-label="Show Bet History"
         >
           📜
@@ -290,43 +266,6 @@ export default function TBGamePage() {
           </div>
           <div style={{ fontSize: '1.09rem', fontWeight: 700, color: '#fff7d6', marginBottom: 2 }}>
             on <span>{EN_TO_HI[winPopup.image] || winPopup.image}</span>!
-          </div>
-        </div>
-      )}
-
-      {/* 📜 Bet History Popup, Dashboard style */}
-      {showHistory && (
-        <div className="tb-history-popup-bg" onClick={() => setShowHistory(false)}>
-          <div
-            className="tb-history-popup"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="tb-history-title">📜 My Bet History</div>
-            {historyLoading ? (
-              <div style={{ textAlign: 'center', padding: 24 }}>Loading...</div>
-            ) : history.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 24, color: '#aaa' }}>No bet history found.</div>
-            ) : (
-              <ul className="tb-history-list">
-                {history.map((h, idx) => (
-                  <li key={idx}>
-                    <span>
-                      <b>Round #{h.round || '-'}</b>
-                      {h.choice && <> - <span>{EN_TO_HI[h.choice] || h.choice}</span></>}
-                    </span>
-                    <span>
-                      ₹{h.amount}
-                      {h.payout !== undefined && (
-                        <span style={{ color: h.payout > 0 ? '#3cff7b' : '#ff6363', marginLeft: 8 }}>
-                          {h.payout > 0 ? `+₹${h.payout}` : 'Lose'}
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <button className="tb-history-close-btn" onClick={() => setShowHistory(false)}>Close</button>
           </div>
         </div>
       )}
