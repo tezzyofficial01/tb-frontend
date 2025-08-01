@@ -1,3 +1,4 @@
+// ✅ FINAL TBGamePage.js with Win Popup on timer === 5
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
@@ -118,8 +119,16 @@ export default function TBGamePage() {
       api.post('/bets/announce-winner', { round: currentRound }, {
         headers: { Authorization: `Bearer ${token}` }
       }).catch(() => {});
+
+      if (winnerChoice && userBets[winnerChoice]) {
+        const payoutAmount = userBets[winnerChoice] * 10;
+        setWinPopup({ show: true, image: winnerChoice, amount: payoutAmount });
+        setTimeout(() => {
+          setWinPopup({ show: false, image: '', amount: 0 });
+        }, 5000);
+      }
     }
-  }, [timer, currentRound]);
+  }, [timer, currentRound, winnerChoice, userBets]);
 
   useEffect(() => {
     const winnerAnnounceHandler = ({ round, choice }) => {
@@ -138,28 +147,6 @@ export default function TBGamePage() {
       winnerTimeoutRef.current = setTimeout(() => setShowWinner(false), 5000);
     }
   }, [timer, winnerChoice]);
-
-  useEffect(() => {
-    if (timer === 0 && currentRound) {
-      const token = localStorage.getItem('token');
-      api.post('/bets/distribute-payouts', { round: currentRound }, {
-        headers: { Authorization: `Bearer ${token}` }
-      }).then(() => {
-        if (winnerChoice && userBets[winnerChoice]) {
-          const payoutAmount = userBets[winnerChoice] * 10;
-          setWinPopup({
-            show: true,
-            image: winnerChoice,
-            amount: payoutAmount
-          });
-
-          setTimeout(() => {
-            setWinPopup({ show: false, image: '', amount: 0 });
-          }, 5000);
-        }
-      }).catch(() => {});
-    }
-  }, [timer, currentRound]);
 
   const handleCoinSelect = (value) => setSelectedCoin(value);
 
@@ -203,13 +190,7 @@ export default function TBGamePage() {
   return (
     <div className="tb-game-root">
       <div className="tb-header-row">
-        <img
-          src="/images/profile.png"
-          alt="profile"
-          className="tb-profile-pic"
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate('/dashboard')}
-        />
+        <img src="/images/profile.png" alt="profile" className="tb-profile-pic" style={{ cursor: "pointer" }} onClick={() => navigate('/dashboard')} />
         <div className="tb-balance-row">
           <img src="/images/coin.png" alt="coin" className="tb-coin-icon" />
           <span>₹{balance}</span>
@@ -233,29 +214,25 @@ export default function TBGamePage() {
             style={{ cursor: timer <= 15 ? "not-allowed" : "pointer" }}
           >
             <img src={item.src} alt={EN_TO_HI[item.name] || item.name} />
-            {!!userBets[item.name] &&
+            {!!userBets[item.name] && (
               <div className="tb-card-coin">
                 <img src="/images/coin.png" alt="coin" />
                 <span>{userBets[item.name]}</span>
               </div>
-            }
+            )}
             <div className="tb-card-label">{EN_TO_HI[item.name]}</div>
           </div>
         ))}
       </div>
 
       <div className="tb-winner-popup-block">
-        {!winnerChoice && timer <= 5 &&
-          <div className="tb-winner-pending">Status: Pending...</div>
-        }
-        {showWinner && winnerChoice &&
+        {!winnerChoice && timer <= 5 && <div className="tb-winner-pending">Status: Pending...</div>}
+        {showWinner && winnerChoice && (
           <div className="tb-winner-popup">
             <img src={`/images/${winnerChoice}.png`} alt={winnerChoice} />
-            <div className="tb-winner-label">
-              🎉 {(EN_TO_HI[winnerChoice] || winnerChoice).toUpperCase()} 🎉
-            </div>
+            <div className="tb-winner-label">🎉 {(EN_TO_HI[winnerChoice] || winnerChoice).toUpperCase()} 🎉</div>
           </div>
-        }
+        )}
       </div>
 
       {winPopup.show && (
@@ -283,14 +260,11 @@ export default function TBGamePage() {
         ))}
       </div>
 
-      {selectedCoin &&
-        <button
-          className="tb-coin-cancel-btn"
-          onClick={() => setSelectedCoin(null)}
-        >
+      {selectedCoin && (
+        <button className="tb-coin-cancel-btn" onClick={() => setSelectedCoin(null)}>
           Cancel Coin
         </button>
-      }
+      )}
 
       <dialog id="tb-lastwin-modal" className="tb-lastwin-modal">
         <div className="tb-lastwin-modal-content">
