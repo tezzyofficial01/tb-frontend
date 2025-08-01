@@ -5,7 +5,6 @@
   display: flex;
   flex-direction: column;
   background: linear-gradient(135deg, #131d27 60%, #233544 100%);
-  
   font-family: 'Poppins', 'Segoe UI', sans-serif;
   overflow: hidden;
 } 
@@ -140,7 +139,7 @@
 
 /* ======= Winner Popup Block (Reserved Space) ======= */
 .tb-winner-popup-block {
-  min-height: 106px; /* always reserving space even when popup not visible */
+  min-height: 106px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,7 +235,9 @@
   width: 30px;
   height: 30px;
   margin-bottom: 4px;
-}  /* ---- Last 10 Wins Modal Styling ---- */
+}
+
+/* ---- Last 10 Wins Modal Styling ---- */
 .tb-lastwin-modal {
   border: none;
   background: rgba(15,18,22,0.82);
@@ -312,4 +313,26 @@
 @keyframes tbFadeIn {
   from { opacity: 0; transform: scale(0.96);}
   to { opacity: 1; transform: scale(1);}
+}
+
+/* ======= ✅ USER WIN POPUP (NEW) ======= */
+.tb-user-win-popup {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #262626, #383838);
+  color: #ffe57f;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 14px 24px;
+  border-radius: 14px;
+  z-index: 9999;
+  box-shadow: 0 8px 22px #000a;
+  animation: popupFadeIn 0.3s ease-in-out;
+  border: 2px solid #ffd70080;
+}
+@keyframes popupFadeIn {
+  from { opacity: 0; transform: translate(-50%, -30%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
 }
