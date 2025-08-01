@@ -47,8 +47,8 @@ export default function TBGamePage() {
   const winnerTimeoutRef = useRef(null);
   const [loadingGame, setLoadingGame] = useState(true);
   const [loadingWins, setLoadingWins] = useState(true);
+  const [winPopup, setWinPopup] = useState({ show: false, image: '', amount: 0 });
 
-  // LIVE STATE FETCH & strict reset on round change!
   useEffect(() => {
     let prevRound = -1;
     const fetchLiveState = async () => {
@@ -65,7 +65,6 @@ export default function TBGamePage() {
         setUserBets(res.data.userBets || {});
         setLoadingGame(false);
 
-        // Hard reset all bets on round switch (no carry forward ever!)
         if (prevRound !== -1 && prevRound !== res.data.round) {
           setUserBets({});
           setBets({});
@@ -86,7 +85,6 @@ export default function TBGamePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // LAST 10 WINS FETCH (no token needed)
   useEffect(() => {
     const fetchLastWins = async () => {
       try {
@@ -105,7 +103,6 @@ export default function TBGamePage() {
     };
   }, []);
 
-  // TIMER 10 pe LOCK WINNER (admin/auto)
   useEffect(() => {
     if (timer === 10 && currentRound) {
       const token = localStorage.getItem('token');
@@ -115,7 +112,6 @@ export default function TBGamePage() {
     }
   }, [timer, currentRound]);
 
-  // TIMER 5 pe WINNER ANNOUNCE (API call)
   useEffect(() => {
     if (timer === 5 && currentRound) {
       const token = localStorage.getItem('token');
@@ -125,7 +121,6 @@ export default function TBGamePage() {
     }
   }, [timer, currentRound]);
 
-  // SOCKET WINNER-ANNOUNCED
   useEffect(() => {
     const winnerAnnounceHandler = ({ round, choice }) => {
       setWinnerChoice(choice || null);
@@ -136,27 +131,38 @@ export default function TBGamePage() {
     };
   }, []);
 
-  // WINNER POPUP: Only timer===5 pe popup dikhana, 5 sec tak
   useEffect(() => {
     if (timer === 5 && winnerChoice) {
       setShowWinner(true);
       if (winnerTimeoutRef.current) clearTimeout(winnerTimeoutRef.current);
-      winnerTimeoutRef.current = setTimeout(() => setShowWinner(false), 5000); // exactly 5 sec
+      winnerTimeoutRef.current = setTimeout(() => setShowWinner(false), 5000);
     }
   }, [timer, winnerChoice]);
 
-  // TIMER 0 pe PAYOUT
   useEffect(() => {
     if (timer === 0 && currentRound) {
       const token = localStorage.getItem('token');
       api.post('/bets/distribute-payouts', { round: currentRound }, {
         headers: { Authorization: `Bearer ${token}` }
+      }).then(() => {
+        if (winnerChoice && userBets[winnerChoice]) {
+          const payoutAmount = userBets[winnerChoice] * 10;
+          setWinPopup({
+            show: true,
+            image: winnerChoice,
+            amount: payoutAmount
+          });
+
+          setTimeout(() => {
+            setWinPopup({ show: false, image: '', amount: 0 });
+          }, 5000);
+        }
       }).catch(() => {});
     }
   }, [timer, currentRound]);
 
-  // COIN SELECT & BET LOGIC
   const handleCoinSelect = (value) => setSelectedCoin(value);
+
   const handleImageBet = async (name) => {
     if (!selectedCoin) return alert("Select a coin first!");
     if (timer <= 15) return alert('Betting closed for the last 15 seconds');
@@ -172,7 +178,6 @@ export default function TBGamePage() {
       await api.post('/bets/place-bet', { choice: name, amount: selectedCoin, round: currentRound }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Success pe backend state fetch karein (optional), ya next interval pe aa jayega
     } catch (e) {
       alert(e.response?.data?.message || 'Bet failed');
       setUserBets(prev => ({
@@ -193,118 +198,121 @@ export default function TBGamePage() {
 
   const userTotalBet = Object.values(userBets || {}).reduce((sum, val) => sum + val, 0);
 
-  if (loadingGame || loadingWins) {
-    return <Loader />;
-  }
+  if (loadingGame || loadingWins) return <Loader />;
 
   return (
-  <div className="tb-game-root">
-    {/* Top Row: Profile | Balance | Last Win */}
-    <div className="tb-header-row">
-      <img
-        src="/images/profile.png"
-        alt="profile"
-        className="tb-profile-pic"
-        style={{ cursor: "pointer" }}
-        onClick={() => navigate('/dashboard')}
-      />
-      <div className="tb-balance-row">
-        <img src="/images/coin.png" alt="coin" className="tb-coin-icon" />
-        <span>₹{balance}</span>
-      </div>
-      <button className="tb-last-win-btn" onClick={() => document.getElementById('tb-lastwin-modal').showModal()}>
-        <img src="/images/trophy.png" alt="last win" />
-      </button>
-    </div>
-    {/* Round and Timer */}
-    <div className="tb-round-timer-row">
-      <div className="tb-round">Round: #{currentRound}</div>
-      <div className="tb-timer">⏱ {timer}s</div>
-    </div>
-    {/* Images */}
-    <div className="tb-image-flex">
-      {IMAGE_LIST.map((item) => (
-        <div
-          key={item.name}
-          className={`tb-card ${highlighted.includes(item.name) ? 'selected' : ''} ${winnerChoice === item.name && showWinner ? 'winner' : ''}`}
-          onClick={() => handleImageBet(item.name)}
-          style={{ cursor: timer <= 15 ? "not-allowed" : "pointer" }}
-        >
-          <img src={item.src} alt={EN_TO_HI[item.name] || item.name} />
-          {!!userBets[item.name] &&
-            <div className="tb-card-coin">
-              <img src="/images/coin.png" alt="coin" />
-              <span>{userBets[item.name]}</span>
-            </div>
-          }
-          <div className="tb-card-label">{EN_TO_HI[item.name]}</div>
+    <div className="tb-game-root">
+      <div className="tb-header-row">
+        <img
+          src="/images/profile.png"
+          alt="profile"
+          className="tb-profile-pic"
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate('/dashboard')}
+        />
+        <div className="tb-balance-row">
+          <img src="/images/coin.png" alt="coin" className="tb-coin-icon" />
+          <span>₹{balance}</span>
         </div>
-      ))}
-    </div>
-    {/* Winner Popup */}
-    <div className="tb-winner-popup-block">
-      {!winnerChoice && timer <= 5 &&
-        <div className="tb-winner-pending">Status: Pending...</div>
-      }
-      {showWinner && winnerChoice &&
-        <div className="tb-winner-popup">
-          <img src={`/images/${winnerChoice}.png`} alt={winnerChoice} />
-          <div className="tb-winner-label">
-            🎉 {(EN_TO_HI[winnerChoice] || winnerChoice).toUpperCase()} 🎉
+        <button className="tb-last-win-btn" onClick={() => document.getElementById('tb-lastwin-modal').showModal()}>
+          <img src="/images/trophy.png" alt="last win" />
+        </button>
+      </div>
+
+      <div className="tb-round-timer-row">
+        <div className="tb-round">Round: #{currentRound}</div>
+        <div className="tb-timer">⏱ {timer}s</div>
+      </div>
+
+      <div className="tb-image-flex">
+        {IMAGE_LIST.map((item) => (
+          <div
+            key={item.name}
+            className={`tb-card ${highlighted.includes(item.name) ? 'selected' : ''} ${winnerChoice === item.name && showWinner ? 'winner' : ''}`}
+            onClick={() => handleImageBet(item.name)}
+            style={{ cursor: timer <= 15 ? "not-allowed" : "pointer" }}
+          >
+            <img src={item.src} alt={EN_TO_HI[item.name] || item.name} />
+            {!!userBets[item.name] &&
+              <div className="tb-card-coin">
+                <img src="/images/coin.png" alt="coin" />
+                <span>{userBets[item.name]}</span>
+              </div>
+            }
+            <div className="tb-card-label">{EN_TO_HI[item.name]}</div>
           </div>
-        </div>
-      }
-    </div>
-    {/* Bet Bar */}
-    <div className="tb-total-bet-row">
-      <span>Your Bet This Round: </span>
-      <b>₹{userTotalBet}</b>
-    </div>
-    {/* Coins Row */}
-    <div className="tb-coin-row">
-      {COINS.map(val => (
-        <button
-          key={val}
-          className={`tb-coin-btn ${selectedCoin === val ? 'selected' : ''}`}
-          onClick={() => handleCoinSelect(val)}
-          disabled={timer <= 15}
-        >
-          <img src="/images/coin.png" alt="coin" />
-          <span>{val}</span>
-        </button>
-      ))}
-    </div>
-    {/* Coin Cancel Button */}
-    {selectedCoin &&
-      <button
-        className="tb-coin-cancel-btn"
-        onClick={() => setSelectedCoin(null)}
-      >
-        Cancel Coin
-      </button>
-    }
-    {/* Last Win Modal */}
-    <dialog id="tb-lastwin-modal" className="tb-lastwin-modal">
-      <div className="tb-lastwin-modal-content">
-        <h2 className="tb-lastwin-title">🏆 Last 10 Wins</h2>
-        <ul className="tb-lastwin-list">
-          {lastWins.map((w, i) => {
-            const round = w && typeof w.round !== 'undefined' ? w.round : "-";
-            const choice = w && w.choice ? w.choice : "-";
-            const name = (EN_TO_HI[choice] || choice).toUpperCase();
-            return (
-              <li key={i}>
-                <span className="tb-lastwin-round">Round {round}:</span>{" "}
-                <span className="tb-lastwin-choice">{name}</span>
-              </li>
-            );
-          })}
-        </ul>
-        <button className="tb-lastwin-close-btn" onClick={() => document.getElementById('tb-lastwin-modal').close()}>
-          Close
-        </button>
+        ))}
       </div>
-    </dialog>
-  </div>
-);
+
+      <div className="tb-winner-popup-block">
+        {!winnerChoice && timer <= 5 &&
+          <div className="tb-winner-pending">Status: Pending...</div>
+        }
+        {showWinner && winnerChoice &&
+          <div className="tb-winner-popup">
+            <img src={`/images/${winnerChoice}.png`} alt={winnerChoice} />
+            <div className="tb-winner-label">
+              🎉 {(EN_TO_HI[winnerChoice] || winnerChoice).toUpperCase()} 🎉
+            </div>
+          </div>
+        }
+      </div>
+
+      {winPopup.show && (
+        <div className="tb-user-win-popup">
+          🎉 You won ₹{winPopup.amount} on "{EN_TO_HI[winPopup.image] || winPopup.image}"!
+        </div>
+      )}
+
+      <div className="tb-total-bet-row">
+        <span>Your Bet This Round: </span>
+        <b>₹{userTotalBet}</b>
+      </div>
+
+      <div className="tb-coin-row">
+        {COINS.map(val => (
+          <button
+            key={val}
+            className={`tb-coin-btn ${selectedCoin === val ? 'selected' : ''}`}
+            onClick={() => handleCoinSelect(val)}
+            disabled={timer <= 15}
+          >
+            <img src="/images/coin.png" alt="coin" />
+            <span>{val}</span>
+          </button>
+        ))}
+      </div>
+
+      {selectedCoin &&
+        <button
+          className="tb-coin-cancel-btn"
+          onClick={() => setSelectedCoin(null)}
+        >
+          Cancel Coin
+        </button>
+      }
+
+      <dialog id="tb-lastwin-modal" className="tb-lastwin-modal">
+        <div className="tb-lastwin-modal-content">
+          <h2 className="tb-lastwin-title">🏆 Last 10 Wins</h2>
+          <ul className="tb-lastwin-list">
+            {lastWins.map((w, i) => {
+              const round = w && typeof w.round !== 'undefined' ? w.round : "-";
+              const choice = w && w.choice ? w.choice : "-";
+              const name = (EN_TO_HI[choice] || choice).toUpperCase();
+              return (
+                <li key={i}>
+                  <span className="tb-lastwin-round">Round {round}:</span>{" "}
+                  <span className="tb-lastwin-choice">{name}</span>
+                </li>
+              );
+            })}
+          </ul>
+          <button className="tb-lastwin-close-btn" onClick={() => document.getElementById('tb-lastwin-modal').close()}>
+            Close
+          </button>
+        </div>
+      </dialog>
+    </div>
+  );
 }
