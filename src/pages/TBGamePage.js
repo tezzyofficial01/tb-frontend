@@ -1,6 +1,4 @@
-// ✅ FINAL TBGamePage.js with Win Popup on timer === 5
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import api from '../services/api';
 import Loader from '../components/Loader';
@@ -34,7 +32,6 @@ const IMAGE_LIST = [
 const COINS = [10, 20, 30, 40, 50, 100];
 
 export default function TBGamePage() {
-  const navigate = useNavigate();
   const [selectedCoin, setSelectedCoin] = useState(null);
   const [highlighted, setHighlighted] = useState([]);
   const [lastWins, setLastWins] = useState([]);
@@ -49,7 +46,11 @@ export default function TBGamePage() {
   const [loadingGame, setLoadingGame] = useState(true);
   const [loadingWins, setLoadingWins] = useState(true);
   const [winPopup, setWinPopup] = useState({ show: false, image: '', amount: 0 });
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // --- Live State ---
   useEffect(() => {
     let prevRound = -1;
     const fetchLiveState = async () => {
@@ -86,6 +87,7 @@ export default function TBGamePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // --- Last 10 Wins ---
   useEffect(() => {
     const fetchLastWins = async () => {
       try {
@@ -104,6 +106,7 @@ export default function TBGamePage() {
     };
   }, []);
 
+  // --- Winner logic ---
   useEffect(() => {
     if (timer === 10 && currentRound) {
       const token = localStorage.getItem('token');
@@ -148,6 +151,7 @@ export default function TBGamePage() {
     }
   }, [timer, winnerChoice]);
 
+  // --- Bet Placement ---
   const handleCoinSelect = (value) => setSelectedCoin(value);
 
   const handleImageBet = async (name) => {
@@ -183,6 +187,22 @@ export default function TBGamePage() {
     }
   };
 
+  // --- Bet History Logic ---
+  const openHistory = async () => {
+    setShowHistory(true);
+    setLoadingHistory(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await api.get('/bets/history', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setHistory(Array.isArray(res.data.history) ? res.data.history : []);
+    } catch {
+      setHistory([]);
+    }
+    setLoadingHistory(false);
+  };
+
   const userTotalBet = Object.values(userBets || {}).reduce((sum, val) => sum + val, 0);
 
   if (loadingGame || loadingWins) return <Loader />;
@@ -190,7 +210,27 @@ export default function TBGamePage() {
   return (
     <div className="tb-game-root">
       <div className="tb-header-row">
-        <img src="/images/profile.png" alt="profile" className="tb-profile-pic" style={{ cursor: "pointer" }} onClick={() => navigate('/dashboard')} />
+        {/* Profile icon ko HATAO, History icon (📜) daalo */}
+        <button
+          className="tb-history-btn"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            marginRight: 8,
+            marginLeft: 0,
+            padding: 0,
+            fontSize: 34,
+            color: '#ffe082',
+            outline: 'none',
+            filter: 'drop-shadow(0 2px 8px #0007)'
+          }}
+          title="My Bet History"
+          onClick={openHistory}
+        >
+          📜
+        </button>
+
         <div className="tb-balance-row">
           <img src="/images/coin.png" alt="coin" className="tb-coin-icon" />
           <span>₹{balance}</span>
@@ -236,30 +276,99 @@ export default function TBGamePage() {
       </div>
 
       {winPopup.show && (
-  <div className="tb-user-win-popup">
-    <div>
-      <img
-        src={`/images/${winPopup.image}.png`}
-        alt="winner"
-        style={{
-          width: 42,
-          height: 42,
-          borderRadius: 9,
-          border: '2px solid #ffd700',
-          marginBottom: 8,
-          boxShadow: '0 2px 12px #ffd70033'
-        }}
-      />
-    </div>
-    <div style={{ fontSize: '1.23rem', fontWeight: 900, color: '#ffd700', marginBottom: 6 }}>
-      You won <span>₹{winPopup.amount}</span>
-    </div>
-    <div style={{ fontSize: '1.09rem', fontWeight: 700, color: '#fff7d6', marginBottom: 2 }}>
-      on <span>{EN_TO_HI[winPopup.image] || winPopup.image}</span>!
-    </div>
-  </div>
-)}
+        <div className="tb-user-win-popup">
+          <div>
+            <img
+              src={`/images/${winPopup.image}.png`}
+              alt="winner"
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 9,
+                border: '2px solid #ffd700',
+                marginBottom: 8,
+                boxShadow: '0 2px 12px #ffd70033'
+              }}
+            />
+          </div>
+          <div style={{ fontSize: '1.23rem', fontWeight: 900, color: '#ffd700', marginBottom: 6 }}>
+            You won <span>₹{winPopup.amount}</span>
+          </div>
+          <div style={{ fontSize: '1.09rem', fontWeight: 700, color: '#fff7d6', marginBottom: 2 }}>
+            on <span>{EN_TO_HI[winPopup.image] || winPopup.image}</span>!
+          </div>
+        </div>
+      )}
 
+      {/* BET HISTORY POPUP/MODAL */}
+      {showHistory && (
+        <div
+          className="tb-history-modal"
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(10,14,20,0.85)',
+            zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+        >
+          <div
+            style={{
+              background: 'linear-gradient(135deg, #20222b 82%, #26283c 100%)',
+              borderRadius: 17,
+              minWidth: 300,
+              maxWidth: '95vw',
+              minHeight: 220,
+              boxShadow: '0 8px 36px #000d',
+              padding: '26px 18px 16px 18px',
+              color: '#fff',
+              position: 'relative',
+            }}
+          >
+            <button
+              onClick={() => setShowHistory(false)}
+              style={{
+                position: 'absolute', right: 11, top: 8,
+                background: 'none', border: 'none', fontSize: 24, color: '#ffd700', cursor: 'pointer'
+              }}
+              title="Close"
+            >✖</button>
+            <h2 style={{ color: '#ffe082', marginBottom: 14, fontSize: 20, textAlign: 'center' }}>📜 My Bet History</h2>
+            {loadingHistory ? (
+              <div style={{ color: '#ffd700', textAlign: 'center', fontSize: 18, padding: 18 }}>Loading...</div>
+            ) : history && history.length > 0 ? (
+              <div style={{ maxHeight: 330, overflowY: 'auto' }}>
+                <table style={{ width: '100%', color: '#fff', fontSize: 15, borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#181818', color: '#ffe082', fontWeight: 700 }}>
+                      <th style={{ padding: 7, borderRadius: 7 }}>Round</th>
+                      <th style={{ padding: 7, borderRadius: 7 }}>Choice</th>
+                      <th style={{ padding: 7, borderRadius: 7 }}>Amount</th>
+                      <th style={{ padding: 7, borderRadius: 7 }}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.map((bet, idx) => (
+                      <tr key={idx} style={{ background: idx % 2 === 0 ? '#262a33' : '#23263b' }}>
+                        <td style={{ padding: '5px 7px', textAlign: 'center' }}>{bet.round || '-'}</td>
+                        <td style={{ padding: '5px 7px', textAlign: 'center' }}>
+                          {(EN_TO_HI[bet.choice] || bet.choice || "-")}
+                        </td>
+                        <td style={{ padding: '5px 7px', textAlign: 'center' }}>₹{bet.amount}</td>
+                        <td style={{ padding: '5px 7px', textAlign: 'center', color: bet.status === 'WIN' ? '#7cffc2' : (bet.status === 'LOSE' ? '#ff7f7f' : '#ffe082'), fontWeight: 700 }}>
+                          {bet.status}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div style={{ color: '#ffe082', textAlign: 'center', fontSize: 17, padding: 15 }}>No Bet History Found</div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="tb-total-bet-row">
         <span>Your Bet This Round: </span>
