@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Loader from "../components/Loader";
 import api from "../services/api";
-import "../styles/bet-history.css"; // 👈 add this
+import "../styles/bet-history.css";
 
 const EN_TO_HI = {
   umbrella: 'छतरी', football: 'फुटबॉल', sun: 'सूरज', diya: 'दीया', cow: 'गाय', bucket: 'बाल्टी',
@@ -28,9 +28,9 @@ export default function BetHistoryPage() {
         <span className="bh-heading-icon">📜</span> My Bet History (Today)
       </h2>
       {loading ? <Loader /> : (
-        history.length === 0 ?
+        history.length === 0 ? (
           <div className="bh-empty">No bets placed in this session.</div>
-          :
+        ) : (
           <div className="bh-table-wrapper">
             <table className="bh-table">
               <thead>
@@ -76,6 +76,7 @@ export default function BetHistoryPage() {
               </tbody>
             </table>
           </div>
+        )
       )}
     </div>
   );
