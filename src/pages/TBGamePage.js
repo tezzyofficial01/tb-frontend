@@ -236,10 +236,30 @@ export default function TBGamePage() {
       </div>
 
       {winPopup.show && (
-        <div className="tb-user-win-popup">
-          🎉 You won ₹{winPopup.amount} on "{EN_TO_HI[winPopup.image] || winPopup.image}"!
-        </div>
-      )}
+  <div className="tb-user-win-popup">
+    <div>
+      <img
+        src={`/images/${winPopup.image}.png`}
+        alt="winner"
+        style={{
+          width: 42,
+          height: 42,
+          borderRadius: 9,
+          border: '2px solid #ffd700',
+          marginBottom: 8,
+          boxShadow: '0 2px 12px #ffd70033'
+        }}
+      />
+    </div>
+    <div style={{ fontSize: '1.23rem', fontWeight: 900, color: '#ffd700', marginBottom: 6 }}>
+      You won <span>₹{winPopup.amount}</span>
+    </div>
+    <div style={{ fontSize: '1.09rem', fontWeight: 700, color: '#fff7d6', marginBottom: 2 }}>
+      on <span>{EN_TO_HI[winPopup.image] || winPopup.image}</span>!
+    </div>
+  </div>
+)}
+
 
       <div className="tb-total-bet-row">
         <span>Your Bet This Round: </span>
