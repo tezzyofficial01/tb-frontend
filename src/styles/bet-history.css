@@ -106,6 +106,9 @@
   font-weight: 700;
   opacity: 0.7;
 }
+.bh-amount-win { color: #36e96c; font-weight: 700; }
+.bh-amount-lose { color: #ff5353; font-weight: 600; }
+.bh-highlight { color: #36e96c; text-shadow: 0 0 2px #5fff7e; }
 
 /* Table mobile scroll */
 @media (max-width: 650px) {
