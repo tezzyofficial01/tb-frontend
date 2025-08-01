@@ -1,4 +1,3 @@
-// ✅ TBGamePage.js with 📜 History Button + Popup (copy-paste top-to-bottom)
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
@@ -50,12 +49,12 @@ export default function TBGamePage() {
   const [loadingWins, setLoadingWins] = useState(true);
   const [winPopup, setWinPopup] = useState({ show: false, image: '', amount: 0 });
 
-  // 👇 History popup state
+  // 📜 Bet History popup state
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  // 👇 Fetch history when popup opens
+  // Fetch history function, same as dashboard
   const fetchHistory = async () => {
     setHistoryLoading(true);
     try {
@@ -214,7 +213,7 @@ export default function TBGamePage() {
   return (
     <div className="tb-game-root">
       <div className="tb-header-row">
-        {/* 👇 History Icon 📜 */}
+        {/* 📜 History Button */}
         <button
           className="tb-history-btn"
           style={{
@@ -295,7 +294,7 @@ export default function TBGamePage() {
         </div>
       )}
 
-      {/* ✅ Bet History Popup */}
+      {/* 📜 Bet History Popup, Dashboard style */}
       {showHistory && (
         <div className="tb-history-popup-bg" onClick={() => setShowHistory(false)}>
           <div
@@ -311,8 +310,18 @@ export default function TBGamePage() {
               <ul className="tb-history-list">
                 {history.map((h, idx) => (
                   <li key={idx}>
-                    <span>Round #{h.round} - </span>
-                    <b>{EN_TO_HI[h.choice] || h.choice}</b> : <span>₹{h.amount}</span>
+                    <span>
+                      <b>Round #{h.round || '-'}</b>
+                      {h.choice && <> - <span>{EN_TO_HI[h.choice] || h.choice}</span></>}
+                    </span>
+                    <span>
+                      ₹{h.amount}
+                      {h.payout !== undefined && (
+                        <span style={{ color: h.payout > 0 ? '#3cff7b' : '#ff6363', marginLeft: 8 }}>
+                          {h.payout > 0 ? `+₹${h.payout}` : 'Lose'}
+                        </span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>
