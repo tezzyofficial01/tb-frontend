@@ -1,25 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
 
 const NotificationBell = ({ userId }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const bellRef = useRef(null);
 
   useEffect(() => {
     const fetchNotifications = async () => {
       if (!userId) return;
       try {
         const res = await api.get(`/notifications/${userId}`);
-        setNotifications(res.data || []);
+        setNotifications(res.data.notifications || []);
       } catch (err) {
         console.error('Failed to fetch notifications:', err);
       }
     };
+
     fetchNotifications();
   }, [userId]);
 
+  // Handle outside click to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div style={{ position: 'relative' }}>
+    <div ref={bellRef} style={{ position: 'relative' }}>
       <div onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer' }}>
         <span role="img" aria-label="bell" style={{ fontSize: 24 }}>🔔</span>
       </div>
@@ -34,7 +48,8 @@ const NotificationBell = ({ userId }) => {
           borderRadius: 8,
           width: 300,
           padding: 10,
-          zIndex: 1000
+          zIndex: 1000,
+          boxShadow: '0px 4px 12px rgba(0,0,0,0.1)'
         }}>
           <strong>Notifications</strong>
           {notifications.length === 0 ? (
