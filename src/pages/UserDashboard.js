@@ -41,9 +41,12 @@ const UserDashboard = () => {
       <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} user={user} numbers={numbers} />
       <div className="dashboard-mobile-main">
         {/* 🔔 Notification bell only when user._id is available */}
-       <div style={{ position: 'absolute', top: 20, right: 20 }}>
-  {user._id && <NotificationBell userId={user._id} />}
-</div>
+      {user._id ? (
+  <div style={{ position: 'absolute', top: 20, right: 20 }}>
+    <NotificationBell userId={user._id} />
+  </div>
+) : null}
+
 
 
         {/* Top Row: Hamburger Menu + Logo (optional) */}
