@@ -14,6 +14,7 @@ export default function LeaderboardPage() {
   return (
     <div className="leaderboard-page">
       <h2>🏆 Full Weekly Leaderboard</h2>
+
       <div className="leaderboard-table">
         <div className="leaderboard-header">
           <span>Rank</span>
@@ -31,6 +32,18 @@ export default function LeaderboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 🎁 Prize Section */}
+      <div className="leaderboard-prizes">
+        <h4>🏆 Prizes This Week</h4>
+        <ul>
+          <li>🥇 1st Rank – ₹1000</li>
+          <li>🥈 2nd Rank – ₹500</li>
+          <li>🥉 3rd Rank – ₹250</li>
+          <li>🏅 Top 10 – ₹100</li>
+          <li>🎉 Top 100 – ₹50</li>
+        </ul>
       </div>
     </div>
   );
