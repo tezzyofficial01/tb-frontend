@@ -39,17 +39,17 @@ const UserDashboard = () => {
   return (
     <div className="dashboard-mobile-bg">
       <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} user={user} numbers={numbers} />
+      
+      {/* Bell icon in fixed corner */}
+      {user._id && (
+        <div style={{ position: 'fixed', top: 10, right: 20 }}>
+          <NotificationBell userId={user._id} />
+        </div>
+      )}
+
       <div className="dashboard-mobile-main">
-        {/* 🔔 Notification bell only when user._id is available */}
-      {user._id ? (
-  <div style={{ position: 'absolute', top: 20, right: 20 }}>
-    <NotificationBell userId={user._id} />
-  </div>
-) : null}
 
-
-
-        {/* Top Row: Hamburger Menu + Logo (optional) */}
+        {/* Header with Menu */}
         <div className="dashboard-header-row">
           <button
             className="menu-icon-btn"
@@ -61,26 +61,28 @@ const UserDashboard = () => {
             <span className="menu-icon-bar"></span>
           </button>
           <div className="dashboard-logo">
-            {/* Optional logo image/text */}
+            {/* Optional logo */}
           </div>
         </div>
 
+        {/* Welcome */}
         <div className="dashboard-welcome">
           <div className="welcome-title">Welcome,</div>
           <div className="user-email">{user.email}</div>
         </div>
 
+        {/* Balance */}
         <div className="dashboard-balance">
           Balance: <span className="balance-amount">₹{user.balance || 0}</span>
         </div>
 
-        {/* 🎮 Game Buttons */}
+        {/* Game Buttons */}
         <div className="dashboard-play-buttons">
           <button onClick={() => navigate('/game/tb')}>Play Titali Bhavara</button>
           <button onClick={() => navigate('/game/spin')}>Play Spin to Win</button>
         </div>
 
-        {/* 📜 Bet History Button */}
+        {/* Bet History */}
         <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
           <button
             onClick={() => navigate('/bet-history')}
