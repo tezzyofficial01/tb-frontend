@@ -8,7 +8,8 @@ import NotificationBell from '../components/NotificationBell';
 import '../styles/userdashboard.css';
 
 const UserDashboard = () => {
-  const [user, setUser] = useState({ id: '', email: '', balance: 0 });
+  // 👇 Fix: _id instead of id
+  const [user, setUser] = useState({ _id: '', email: '', balance: 0 });
   const [numbers, setNumbers] = useState({ depositWhatsapp: '', withdrawWhatsapp: '' });
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -40,16 +41,15 @@ const UserDashboard = () => {
     <div className="dashboard-mobile-bg">
       <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} user={user} numbers={numbers} />
 
-      {/* 🔔 Bell Icon Fixed Position */}
+      {/* 🔔 Bell Icon */}
       {user._id && (
-  <div style={{ position: 'fixed', top: 10, right: 10 }}>
-    <NotificationBell userId={user._id} />
-  </div>
-)}
-
+        <div style={{ position: 'fixed', top: 10, right: 10, zIndex: 9999 }}>
+          <NotificationBell userId={user._id} />
+        </div>
+      )}
 
       <div className="dashboard-mobile-main">
-        {/* Header */}
+        {/* Top Header */}
         <div className="dashboard-header-row">
           <button
             className="menu-icon-btn"
@@ -60,7 +60,7 @@ const UserDashboard = () => {
             <span className="menu-icon-bar"></span>
             <span className="menu-icon-bar"></span>
           </button>
-          <div className="dashboard-logo">{/* Optional logo */}</div>
+          <div className="dashboard-logo">{/* Optional Logo */}</div>
         </div>
 
         {/* Welcome Message */}
@@ -80,7 +80,7 @@ const UserDashboard = () => {
           <button onClick={() => navigate('/game/spin')}>Play Spin to Win</button>
         </div>
 
-        {/* Bet History Button */}
+        {/* Bet History */}
         <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
           <button
             onClick={() => navigate('/bet-history')}
