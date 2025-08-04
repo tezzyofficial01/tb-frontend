@@ -1,10 +1,11 @@
+// pages/UserDashboard.js
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import SideMenu from '../components/SideMenu';
-import '../styles/userdashboard.css';
 import NotificationBell from '../components/NotificationBell';
+import '../styles/userdashboard.css';
 
 const UserDashboard = () => {
   const [user, setUser] = useState({ id: '', email: '', balance: 0 });
@@ -39,9 +40,13 @@ const UserDashboard = () => {
     <div className="dashboard-mobile-bg">
       <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} user={user} numbers={numbers} />
       <div className="dashboard-mobile-main">
-<div style={{ position: 'absolute', top: 20, right: 20 }}>
-  <NotificationBell userId={user._id} />
-</div>
+        {/* 🔔 Notification bell only when user._id is available */}
+        {user._id && (
+          <div style={{ position: 'absolute', top: 20, right: 20 }}>
+            <NotificationBell userId={user._id} />
+          </div>
+        )}
+
         {/* Top Row: Hamburger Menu + Logo (optional) */}
         <div className="dashboard-header-row">
           <button
@@ -62,17 +67,18 @@ const UserDashboard = () => {
           <div className="welcome-title">Welcome,</div>
           <div className="user-email">{user.email}</div>
         </div>
+
         <div className="dashboard-balance">
           Balance: <span className="balance-amount">₹{user.balance || 0}</span>
         </div>
 
-        {/* 🔥 Play buttons */}
+        {/* 🎮 Game Buttons */}
         <div className="dashboard-play-buttons">
           <button onClick={() => navigate('/game/tb')}>Play Titali Bhavara</button>
           <button onClick={() => navigate('/game/spin')}>Play Spin to Win</button>
         </div>
 
-        {/* 🔥 My Bet History Button */}
+        {/* 📜 Bet History Button */}
         <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
           <button
             onClick={() => navigate('/bet-history')}
