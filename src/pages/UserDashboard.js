@@ -42,7 +42,7 @@ const UserDashboard = () => {
       <div className="dashboard-mobile-main">
         {/* 🔔 Notification bell only when user._id is available */}
        <div style={{ position: 'absolute', top: 20, right: 20 }}>
-  <NotificationBell userId={user._id} />
+  {user._id && <NotificationBell userId={user._id} />}
 </div>
 
 
