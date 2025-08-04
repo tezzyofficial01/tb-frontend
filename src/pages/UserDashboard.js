@@ -43,11 +43,12 @@ const UserDashboard = () => {
       <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} user={user} numbers={numbers} />
 
       {/* 🔔 Bell Icon */}
-   {user._id && !loading && (
+{user.id && !loading && (
   <div style={{ position: 'fixed', top: 10, right: 10, zIndex: 9999 }}>
-    <NotificationBell userId={user._id} />
+    <NotificationBell userId={user.id} />
   </div>
 )}
+
 
 
       <div className="dashboard-mobile-main">
