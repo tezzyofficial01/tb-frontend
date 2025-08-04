@@ -7,25 +7,23 @@ const NotificationBell = ({ userId }) => {
   const [notifications, setNotifications] = useState([]);
   const dropdownRef = useRef(null);
 
-  // Fetch notifications
   useEffect(() => {
     const fetchNotifications = async () => {
       if (!userId) return;
       try {
         const res = await api.get(`/notifications/${userId}`);
-        console.log('🔔 NOTIFICATIONS:', res.data.notifications);
+        console.log('🔔 Notifications:', res.data.notifications);
         setNotifications(res.data.notifications || []);
       } catch (err) {
-        console.error('❌ Failed to fetch notifications:', err);
+        console.error('Failed to fetch notifications:', err);
       }
     };
     fetchNotifications();
   }, [userId]);
 
-  // Close dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
     };
@@ -38,7 +36,7 @@ const NotificationBell = ({ userId }) => {
   return (
     <div ref={dropdownRef} style={{ position: 'relative', zIndex: 1000 }}>
       <div onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer' }}>
-        <span role="img" aria-label="bell" style={{ fontSize: 26 }}>🔔</span>
+        <span style={{ fontSize: 26 }} role="img" aria-label="bell">🔔</span>
       </div>
 
       {showDropdown && (
@@ -46,12 +44,12 @@ const NotificationBell = ({ userId }) => {
           position: 'absolute',
           top: 30,
           right: 0,
-          background: '#fff',
+          backgroundColor: '#fff',
           border: '1px solid #ccc',
           borderRadius: 8,
           width: 300,
           padding: 10,
-          boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+          boxShadow: '0px 4px 8px rgba(0,0,0,0.2)'
         }}>
           <strong>Notifications</strong>
           {notifications.length === 0 ? (
@@ -61,7 +59,7 @@ const NotificationBell = ({ userId }) => {
               {notifications.map((n, idx) => (
                 <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid #eee' }}>
                   <div>{n.message}</div>
-                  <small style={{ color: '#666' }}>
+                  <small style={{ color: '#888' }}>
                     {new Date(n.createdAt).toLocaleString()}
                   </small>
                 </li>
