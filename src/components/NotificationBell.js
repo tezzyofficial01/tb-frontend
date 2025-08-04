@@ -1,4 +1,3 @@
-// components/NotificationBell.js
 import React, { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
 
@@ -12,7 +11,7 @@ const NotificationBell = ({ userId }) => {
       if (!userId) return;
       try {
         const res = await api.get(`/notifications/${userId}`);
-        console.log('🔔 Notifications response:', res.data);
+        console.log('🔔 NOTIFICATIONS:', res.data.notifications);
         setNotifications(res.data.notifications || []);
       } catch (err) {
         console.error('Failed to fetch notifications:', err);
