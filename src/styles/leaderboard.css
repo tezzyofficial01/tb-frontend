@@ -54,3 +54,44 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+
+.leaderboard-page {
+  padding: 20px;
+  background-color: #fef7e0;
+  min-height: 100vh;
+}
+
+.leaderboard-page h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.leaderboard-table {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #fff9e6;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.leaderboard-header, .leaderboard-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e1d7a1;
+  font-size: 14px;
+}
+
+.leaderboard-header {
+  font-weight: bold;
+  background-color: #ffeda0;
+}
+
+.rank-1 { background: gold; }
+.rank-2 { background: silver; }
+.rank-3 { background: #cd7f32; color: white; }
+
