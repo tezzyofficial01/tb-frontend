@@ -2,52 +2,54 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 
 const NotificationBell = ({ userId }) => {
-  const [show, setShow] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    if (show && userId) {
-      api.get(`/notifications/${userId}`)
-        .then(res => setNotifications(res.data.notifications || []))
-        .catch(() => setNotifications([]));
-    }
-  }, [show, userId]);
+    const fetchNotifications = async () => {
+      if (!userId) return;
+      try {
+        const res = await api.get(`/notifications/${userId}`);
+        setNotifications(res.data || []);
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err);
+      }
+    };
+    fetchNotifications();
+  }, [userId]);
 
   return (
     <div style={{ position: 'relative' }}>
-      <button onClick={() => setShow(!show)} style={{
-        fontSize: '20px',
-        background: 'none',
-        border: 'none',
-        color: '#fff',
-        cursor: 'pointer'
-      }}>
-        🔔
-      </button>
+      <div onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer' }}>
+        <span role="img" aria-label="bell" style={{ fontSize: 24 }}>🔔</span>
+      </div>
 
-      {show && (
+      {showDropdown && (
         <div style={{
           position: 'absolute',
-          top: '30px',
+          top: 30,
           right: 0,
           background: '#fff',
-          color: '#000',
-          padding: '10px',
-          borderRadius: '8px',
-          width: '250px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+          border: '1px solid #ccc',
+          borderRadius: 8,
+          width: 300,
+          padding: 10,
           zIndex: 1000
         }}>
-          <h4 style={{ marginTop: 0 }}>Notifications</h4>
+          <strong>Notifications</strong>
           {notifications.length === 0 ? (
-            <p>No notifications yet.</p>
+            <div style={{ marginTop: 10 }}>No notifications yet.</div>
           ) : (
-            notifications.map((n, i) => (
-              <div key={i} style={{ borderBottom: '1px solid #ccc', padding: '6px 0' }}>
-                <strong>{n.type.toUpperCase()}</strong> of ₹{n.amount}<br />
-                <small>{new Date(n.createdAt).toLocaleString()}</small>
-              </div>
-            ))
+            <ul style={{ listStyle: 'none', padding: 0, marginTop: 10 }}>
+              {notifications.map((n, idx) => (
+                <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid #eee' }}>
+                  <div>{n.message}</div>
+                  <small style={{ color: '#666' }}>
+                    {new Date(n.createdAt).toLocaleString()}
+                  </small>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       )}
