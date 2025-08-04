@@ -23,6 +23,7 @@ const UserDashboard = () => {
         const resUser = await api.get('/users/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
+         console.log("USER DATA:", resUser.data); // 👈👈👈 Add this
         setUser(resUser.data);
 
         const resSettings = await api.get('/settings');
