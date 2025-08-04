@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import SideMenu from '../components/SideMenu';
 import '../styles/userdashboard.css';
+import NotificationBell from '../components/NotificationBell';
 
 const UserDashboard = () => {
   const [user, setUser] = useState({ id: '', email: '', balance: 0 });
@@ -38,7 +39,9 @@ const UserDashboard = () => {
     <div className="dashboard-mobile-bg">
       <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} user={user} numbers={numbers} />
       <div className="dashboard-mobile-main">
-
+<div style={{ position: 'absolute', top: 20, right: 20 }}>
+  <NotificationBell userId={user._id} />
+</div>
         {/* Top Row: Hamburger Menu + Logo (optional) */}
         <div className="dashboard-header-row">
           <button
