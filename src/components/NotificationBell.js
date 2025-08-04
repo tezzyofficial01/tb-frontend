@@ -34,15 +34,28 @@ const NotificationBell = ({ userId }) => {
   }, []);
 
   return (
-    <div ref={dropdownRef} style={{ position: 'relative', zIndex: 1000 }}>
+    <div ref={dropdownRef} style={{ position: 'relative', zIndex: 9999 }}>
       <div onClick={() => setShowDropdown(!showDropdown)} style={{ cursor: 'pointer' }}>
-        <span style={{ fontSize: 26 }} role="img" aria-label="bell">🔔</span>
+        <span
+          style={{
+            fontSize: 26,
+            color: '#fff',
+            background: '#333',
+            padding: 6,
+            borderRadius: '50%',
+            boxShadow: '0 0 5px #0006'
+          }}
+          role="img"
+          aria-label="bell"
+        >
+          🔔
+        </span>
       </div>
 
       {showDropdown && (
         <div style={{
           position: 'absolute',
-          top: 30,
+          top: 36,
           right: 0,
           backgroundColor: '#fff',
           border: '1px solid #ccc',
