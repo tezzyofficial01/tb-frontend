@@ -41,11 +41,9 @@ const UserDashboard = () => {
       <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} user={user} numbers={numbers} />
 
       {/* 🔔 Bell Icon Fixed Position */}
-      {user._id && (
-        <div style={{ position: 'fixed', top: 10, right: 10 }}>
-          <NotificationBell userId={user._id} />
-        </div>
-      )}
+      <div style={{ position: 'fixed', top: 10, right: 10, zIndex: 9999 }}>
+  <NotificationBell userId={user._id} />
+</div>
 
       <div className="dashboard-mobile-main">
         {/* Header */}
