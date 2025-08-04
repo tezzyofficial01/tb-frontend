@@ -55,4 +55,52 @@ const UserDashboard = () => {
             onClick={() => setMenuOpen(true)}
             aria-label="Open menu"
           >
-            <span className="menu-icon-bar"
+            <span className="menu-icon-bar"></span>
+            <span className="menu-icon-bar"></span>
+            <span className="menu-icon-bar"></span>
+          </button>
+          <div className="dashboard-logo">{/* Optional logo */}</div>
+        </div>
+
+        {/* Welcome Message */}
+        <div className="dashboard-welcome">
+          <div className="welcome-title">Welcome,</div>
+          <div className="user-email">{user.email}</div>
+        </div>
+
+        {/* Balance */}
+        <div className="dashboard-balance">
+          Balance: <span className="balance-amount">₹{user.balance || 0}</span>
+        </div>
+
+        {/* Game Buttons */}
+        <div className="dashboard-play-buttons">
+          <button onClick={() => navigate('/game/tb')}>Play Titali Bhavara</button>
+          <button onClick={() => navigate('/game/spin')}>Play Spin to Win</button>
+        </div>
+
+        {/* Bet History Button */}
+        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
+          <button
+            onClick={() => navigate('/bet-history')}
+            style={{
+              background: '#4629e6',
+              color: '#fff',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: 7,
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              fontSize: 16,
+              boxShadow: '0 2px 10px #0002'
+            }}
+          >
+            📜 My Bet History
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserDashboard;
