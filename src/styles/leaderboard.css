@@ -95,3 +95,24 @@
 .rank-2 { background: silver; }
 .rank-3 { background: #cd7f32; color: white; }
 
+.leaderboard-prizes {
+  margin-top: 20px;
+  padding: 10px;
+  background: #fff3c9;
+  border-radius: 10px;
+  text-align: left;
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+.leaderboard-prizes h4 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.leaderboard-prizes ul {
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+
