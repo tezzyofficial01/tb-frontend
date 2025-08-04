@@ -13,6 +13,7 @@ const NotificationBell = ({ userId }) => {
       if (!userId) return;
       try {
         const res = await api.get(`/notifications/${userId}`);
+         console.log('🔔 NOTIFICATIONS:', res.data);  // ADD THIS
         setNotifications(res.data.notifications || []);
       } catch (err) {
         console.error('Failed to fetch notifications:', err);
