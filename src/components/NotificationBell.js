@@ -12,7 +12,7 @@ const NotificationBell = ({ userId }) => {
     const fetchNotifications = async () => {
       try {
         const res = await api.get(`/notifications/${userId}`);
-        console.log("🔔 Notifications from backend:", res.data.notifications); // Debug
+        
         setNotifications(res.data.notifications || []);
       } catch (err) {
         console.error('Failed to fetch notifications:', err);
