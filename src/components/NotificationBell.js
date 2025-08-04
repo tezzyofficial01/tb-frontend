@@ -1,4 +1,4 @@
-// NotificationBell.js
+// components/NotificationBell.js
 import React, { useEffect, useState, useRef } from 'react';
 import api from '../services/api';
 
@@ -7,13 +7,13 @@ const NotificationBell = ({ userId }) => {
   const [notifications, setNotifications] = useState([]);
   const dropdownRef = useRef(null);
 
-  // ✅ Fetch notifications
+  // 🔔 Fetch notifications
   useEffect(() => {
     const fetchNotifications = async () => {
       if (!userId) return;
       try {
         const res = await api.get(`/notifications/${userId}`);
-         console.log('🔔 NOTIFICATIONS:', res.data);  // ADD THIS
+        console.log('🔔 Notifications:', res.data);  // Debug line
         setNotifications(res.data.notifications || []);
       } catch (err) {
         console.error('Failed to fetch notifications:', err);
@@ -22,7 +22,7 @@ const NotificationBell = ({ userId }) => {
     fetchNotifications();
   }, [userId]);
 
-  // ✅ Hide dropdown on outside click
+  // 🔐 Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
