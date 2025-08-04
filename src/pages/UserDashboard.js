@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import SideMenu from '../components/SideMenu';
 import NotificationBell from '../components/NotificationBell';
+import LeaderboardMini from '../components/LeaderboardMini';
+
 import '../styles/userdashboard.css';
 
 const UserDashboard = () => {
@@ -83,25 +85,8 @@ const UserDashboard = () => {
           <button onClick={() => navigate('/game/spin')}>Play Spin to Win</button>
         </div>
 
-        {/* Bet History */}
-        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
-          <button
-            onClick={() => navigate('/bet-history')}
-            style={{
-              background: '#4629e6',
-              color: '#fff',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: 7,
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              fontSize: 16,
-              boxShadow: '0 2px 10px #0002'
-            }}
-          >
-            📜 My Bet History
-          </button>
-        </div>
+       <LeaderboardMini />
+
       </div>
     </div>
   );
