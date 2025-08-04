@@ -16,6 +16,8 @@ import AdminRoute from './components/AdminRoute';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import BetHistoryPage from './pages/BetHistoryPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -56,6 +58,9 @@ function App() {
 
         {/* User Protected Routes */}
         <Route path="/dashboard" element={token ? <UserDashboard /> : <Navigate to="/login" replace />} />
+         <Route path="/leaderboard" element={token ? <LeaderboardPage /> : <Navigate to="/login" replace />} />
+
+
         <Route path="/bet-history" element={token ? <BetHistoryPage /> : <Navigate to="/login" replace />} />
         <Route path="/referral" element={token ? <ReferralPage /> : <Navigate to="/login" replace />} />
         <Route path="/game/tb" element={token ? <TBGamePage /> : <Navigate to="/login" replace />} />
