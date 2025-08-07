@@ -48,6 +48,7 @@ export default function TBGamePage() {
   const [loadingGame, setLoadingGame] = useState(true);
   const [loadingWins, setLoadingWins] = useState(true);
   const [winPopup, setWinPopup] = useState({ show: false, image: '', amount: 0 });
+  const [betting, setBetting] = useState(false); // 🟢 NEW: lock during bet
 
   useEffect(() => {
     let prevRound = -1;
@@ -149,36 +150,31 @@ export default function TBGamePage() {
 
   const handleCoinSelect = (value) => setSelectedCoin(value);
 
+  // 🟢 FIXED HANDLE BET FUNCTION 🟢
   const handleImageBet = async (name) => {
+    if (betting) return; // Lock double click
     if (!selectedCoin) return alert("Select a coin first!");
     if (timer <= 15) return alert('Betting closed for the last 15 seconds');
     if (balance < selectedCoin) return alert('Insufficient balance');
-    setHighlighted(h => (h.includes(name) ? h : [...h, name]));
-    setUserBets(prev => ({
-      ...prev,
-      [name]: (prev[name] || 0) + selectedCoin
-    }));
-    setBalance(prev => prev - selectedCoin);
+
+    setBetting(true);
     try {
       const token = localStorage.getItem('token');
+      // API call only, no local update yet
       await api.post('/bets/place-bet', { choice: name, amount: selectedCoin, round: currentRound }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      // After success, sync true state from backend (no manual increment)
+      const res = await api.get('/bets/live-state', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUserBets(res.data.userBets || {});
+      setBalance(res.data.balance || 0);
+      setHighlighted(h => (h.includes(name) ? h : [...h, name]));
     } catch (e) {
       alert(e.response?.data?.message || 'Bet failed');
-      setUserBets(prev => ({
-        ...prev,
-        [name]: (prev[name] || 0) - selectedCoin
-      }));
-      setBalance(prev => prev + selectedCoin);
-      try {
-        const token = localStorage.getItem('token');
-        const res = await api.get('/bets/live-state', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUserBets(res.data.userBets || {});
-        setBalance(res.data.balance || 0);
-      } catch {}
+    } finally {
+      setBetting(false);
     }
   };
 
@@ -221,7 +217,10 @@ export default function TBGamePage() {
             key={item.name}
             className={`tb-card ${highlighted.includes(item.name) ? 'selected' : ''} ${winnerChoice === item.name && showWinner ? 'winner' : ''}`}
             onClick={() => handleImageBet(item.name)}
-            style={{ cursor: timer <= 15 ? "not-allowed" : "pointer" }}
+            style={{
+              cursor: timer <= 15 || betting ? "not-allowed" : "pointer",
+              opacity: betting ? 0.7 : 1
+            }}
           >
             <img src={item.src} alt={EN_TO_HI[item.name] || item.name} />
             {!!userBets[item.name] && (
@@ -281,7 +280,7 @@ export default function TBGamePage() {
             key={val}
             className={`tb-coin-btn ${selectedCoin === val ? 'selected' : ''}`}
             onClick={() => handleCoinSelect(val)}
-            disabled={timer <= 15}
+            disabled={timer <= 15 || betting}
           >
             <img src="/images/coin.png" alt="coin" />
             <span>{val}</span>
