@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import api from '../services/api';
 import '../styles/auth.css';
 
 // Utility to get query params
@@ -21,10 +21,9 @@ const OtpVerify = () => {
     setLoading(true);
     setMsg('');
     try {
-      // API call
-      const res = await axios.post(
-        //  'http://localhost:5000/api/auth/verify-otp',
-        'http://147.93.107.58:5000/api/auth/verify-otp',
+      // API call (no hardcoded IP; services/api.js handles baseURL)
+      const res = await api.post(
+        '/auth/verify-otp',
         { email, otp },
         { headers: { 'Content-Type': 'application/json' } }
       );
