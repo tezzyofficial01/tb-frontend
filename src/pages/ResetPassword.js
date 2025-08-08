@@ -1,6 +1,7 @@
+// client/src/pages/ResetPassword.jsx
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -14,13 +15,11 @@ const ResetPassword = () => {
     setLoading(true);
     setMsg('');
     try {
-      await axios.post(`http://147.93.107.58:5000/api/auth/reset-password/${token}`, {
-        newPassword
-      });
+      await api.post(`/auth/reset-password/${token}`, { newPassword });
       setMsg('Password reset successfully! Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setMsg(err.response?.data?.message || 'Failed to reset password.');
+      setMsg(err?.response?.data?.message || 'Failed to reset password.');
     }
     setLoading(false);
   };
@@ -33,14 +32,23 @@ const ResetPassword = () => {
           type="password"
           placeholder="Enter new password"
           value={newPassword}
-          onChange={e => setNewPassword(e.target.value)}
+          onChange={(e) => setNewPassword(e.target.value)}
           required
         />
         <button type="submit" disabled={loading}>
           {loading ? 'Resetting...' : 'Reset Password'}
         </button>
       </form>
-      {msg && <p style={{ color: msg.startsWith('Password reset') ? 'green' : 'red', marginTop: '10px' }}>{msg}</p>}
+      {msg && (
+        <p
+          style={{
+            color: msg.startsWith('Password reset') ? 'green' : 'red',
+            marginTop: '10px',
+          }}
+        >
+          {msg}
+        </p>
+      )}
     </div>
   );
 };
