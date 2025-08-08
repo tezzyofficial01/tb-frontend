@@ -11,9 +11,9 @@ const SideMenu = ({ open, onClose, user, numbers }) => {
           className="sidemenu-btn refer"
           onClick={() => window.location.href = '/referral'}
         >🎁 Refer & Earn ₹100</button>
-       <button
+ <button
   className="sidemenu-btn"
-  onClick={() => window.location.href = '/deposit'}
+  onClick={() => window.location.href = `https://wa.me/${numbers.depositWhatsapp}?text=${encodeURIComponent(`I want to deposit. UserID: ${user.id}, Email: ${user.email}`)}`}
 >
   Deposit
 </button>
