@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import api from '../services/api';           // ✅ axios ki jagah centralized API
 import Loader from '../components/Loader';
 import '../styles/auth.css';
 
@@ -18,8 +18,8 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(
-        'http://147.93.107.58:5000/api/auth/login',
+      const res = await api.post(
+        '/auth/login',                      // ✅ baseURL '/api' handle karega (vercel.json rewrites)
         { email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
