@@ -24,8 +24,7 @@ const IMAGE_LIST = [
   { name: 'rabbit', src: '/images/rabbit.png' }
 ];
 
-const socket = io('http://147.93.107.58:5000', {
-  transports: ['websocket'],
+const socket =  io('/', { path: '/socket.io', transports: ['websocket'],
   reconnectionAttempts: 5,
   timeout: 20000,
 });
