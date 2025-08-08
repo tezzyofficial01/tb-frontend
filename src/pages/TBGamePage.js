@@ -10,7 +10,7 @@ const EN_TO_HI = {
   kite: 'पतंग', spinningtop: 'भंवरा', rose: 'गुलाब', butterfly: 'तितली', pigeon: 'कबूतर', rabbit: 'खरगोश'
 };
 
-const socket = io('http://147.93.107.58:5000', {
+const socket = io('/', {
   transports: ['websocket'],
   reconnectionAttempts: 5,
   timeout: 20000,
