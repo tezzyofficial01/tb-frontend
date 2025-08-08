@@ -17,6 +17,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import BetHistoryPage from './pages/BetHistoryPage';
 import LeaderboardPage from './pages/LeaderboardPage';
+import DepositPage from './pages/DepositPage';
 
 
 function App() {
@@ -59,7 +60,7 @@ function App() {
         {/* User Protected Routes */}
         <Route path="/dashboard" element={token ? <UserDashboard /> : <Navigate to="/login" replace />} />
          <Route path="/leaderboard" element={token ? <LeaderboardPage /> : <Navigate to="/login" replace />} />
-
+        <Route path="/deposit" element={<DepositPage />} />
 
         <Route path="/bet-history" element={token ? <BetHistoryPage /> : <Navigate to="/login" replace />} />
         <Route path="/referral" element={token ? <ReferralPage /> : <Navigate to="/login" replace />} />
