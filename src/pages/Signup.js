@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import Loader from '../components/Loader';
 import '../styles/auth.css';
@@ -25,11 +25,10 @@ const Signup = () => {
       const signupData = { email, password };
       if (referrerId) signupData.referrerId = referrerId;
 
-      await axios.post(
-        'http://147.93.107.58:5000/api/auth/signup',
-        signupData,
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+      await api.post('/auth/signup', signupData, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+
       setLoading(false);
       navigate(`/verify-otp?email=${encodeURIComponent(email)}`);
     } catch (err) {
