@@ -26,7 +26,7 @@ const Signup = () => {
       if (referrerId) signupData.referrerId = referrerId;
 
       await axios.post(
-        'https://tb-backend-tnab.onrender.com/api/auth/signup',
+        'http://147.93.107.58:5000/api/auth/signup',
         signupData,
         { headers: { 'Content-Type': 'application/json' } }
       );
