@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../services/api'; // ✅ direct api.js ka use
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ const ForgotPassword = () => {
     setLoading(true);
     setMsg('');
     try {
-      await axios.post('http://147.93.107.58:5000/api/auth/forgot-password', { email });
+      await api.post('/auth/forgot-password', { email }); // ✅ no IP, api.js handle karega
       setMsg('Reset link sent to your email (check spam folder also).');
     } catch (err) {
       setMsg(err.response?.data?.message || 'Something went wrong. Try again.');
@@ -34,7 +34,11 @@ const ForgotPassword = () => {
           {loading ? 'Sending...' : 'Send Reset Link'}
         </button>
       </form>
-      {msg && <p style={{ color: msg.startsWith('Reset') ? 'green' : 'red', marginTop: '10px' }}>{msg}</p>}
+      {msg && (
+        <p style={{ color: msg.startsWith('Reset') ? 'green' : 'red', marginTop: '10px' }}>
+          {msg}
+        </p>
+      )}
     </div>
   );
 };
