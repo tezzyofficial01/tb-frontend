@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 import api from '../services/api';
 import Loader from '../components/Loader';
 import '../styles/game.css';
-import { SFX } from '../utils/sounds'; // ✅ NEW: sound API
+import { SFX } from '../utils/sounds'; // ✅ Sound API
 
 const EN_TO_HI = {
   umbrella: 'छतरी', football: 'फुटबॉल', sun: 'सूरज', diya: 'दीया', cow: 'गाय', bucket: 'बाल्टी',
@@ -50,11 +50,11 @@ export default function TBGamePage() {
   const [loadingWins, setLoadingWins] = useState(true);
   const [winPopup, setWinPopup] = useState({ show: false, image: '', amount: 0 });
 
-  // ✅ NEW: SFX helpers
+  // ✅ SFX helpers
   const prevSecRef = useRef(null);            // last second for tick
   const winnerSoundRoundRef = useRef(null);   // to play winner sound once per round
 
-  // ✅ NEW: unlock all audio on first user gesture (even if side menu nahi khola)
+  // unlock all audio on first user gesture
   useEffect(() => {
     const unlock = () => SFX.unlockAll();
     window.addEventListener('pointerdown', unlock, { once: true });
@@ -78,14 +78,16 @@ export default function TBGamePage() {
         setLoadingGame(false);
 
         if (prevRound !== -1 && prevRound !== res.data.round) {
+          // ✅ NEW: round change → reset + force stop tick
           setUserBets({});
           setBets({});
           setWinnerChoice(null);
           setShowWinner(false);
           setHighlighted([]);
           setSelectedCoin(null);
-          // ✅ NEW: reset tick tracker for next round
           prevSecRef.current = null;
+          winnerSoundRoundRef.current = null;
+          SFX.stopTick();
         }
         prevRound = res.data.round;
       } catch {
@@ -96,7 +98,11 @@ export default function TBGamePage() {
     };
     fetchLiveState();
     const interval = setInterval(fetchLiveState, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // ✅ unmount pe bhi tick band
+      SFX.stopTick();
+    };
   }, []);
 
   useEffect(() => {
@@ -161,25 +167,37 @@ export default function TBGamePage() {
     }
   }, [timer, winnerChoice]);
 
-  // ✅ NEW: Timer-based SFX (tick + winner)
+  // ✅ STRICT tick control
   useEffect(() => {
-    // SFX toggle check
-    if (!SFX.isSfxEnabled()) return;
-    if (typeof timer !== 'number') return;
+    if (!SFX.isSfxEnabled() || typeof timer !== 'number') return;
 
-    // TICK from 15s down to 6s (play once per second)
-    if (timer <= 15 && timer >= 6) {
-      if (prevSecRef.current !== timer) {
-        SFX.playTick();
-        prevSecRef.current = timer;
-      }
-    } else {
+    // Out of tick window → ensure tick is fully stopped
+    if (timer <= 5 || timer > 15) {
+      SFX.stopTick();
       prevSecRef.current = timer;
+      return;
     }
 
-    // WINNER sound exactly at 5s, only once per round
+    // TICK from 15..6, exactly once per visible second
+    if (timer <= 15 && timer >= 6) {
+      if (prevSecRef.current !== timer) {
+        SFX.playTick();     // play = stop + restart (no overlap)
+        prevSecRef.current = timer;
+      }
+      return;
+    }
+
+    // Fallback safety
+    SFX.stopTick();
+  }, [timer]);
+
+  // Winner sound exactly once per round @ 5s
+  useEffect(() => {
+    if (!SFX.isSfxEnabled()) return;
     if (timer === 5 && currentRound) {
       if (winnerSoundRoundRef.current !== currentRound) {
+        // 5s pe tick band + winner play
+        SFX.stopTick();
         SFX.playWinner();
         winnerSoundRoundRef.current = currentRound;
       }
@@ -188,17 +206,15 @@ export default function TBGamePage() {
 
   const handleCoinSelect = (value) => {
     setSelectedCoin(value);
-    // ✅ NEW: coin pickup sound on selecting coin value
     if (SFX.isSfxEnabled()) SFX.playCoinPickup();
   };
 
-  // 🟢 INSTANT UI BET FUNCTION (Optimistic Update)
+  // Optimistic bet
   const handleImageBet = async (name) => {
     if (!selectedCoin) return alert("Select a coin first!");
     if (timer <= 15) return alert('Betting closed for the last 15 seconds');
     if (balance < selectedCoin) return alert('Insufficient balance');
 
-    // ✅ NEW: coin drop sound when placing bet
     if (SFX.isSfxEnabled()) SFX.playCoinDrop();
 
     setUserBets(prev => ({
@@ -213,7 +229,6 @@ export default function TBGamePage() {
       await api.post('/bets/place-bet', { choice: name, amount: selectedCoin, round: currentRound }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Success: UI already updated
     } catch (e) {
       alert(e.response?.data?.message || 'Bet failed');
       setUserBets(prev => ({
@@ -238,14 +253,12 @@ export default function TBGamePage() {
 
   return (
     <div className="tb-game-root">
+      {/* ...UI same as your version (no visual changes)... */}
+      {/* Header */}
       <div className="tb-header-row">
-        {/* 📜 History Button */}
         <button
           className="tb-history-btn"
-          style={{
-            background: 'none', border: 'none', fontSize: 30, cursor: 'pointer',
-            marginRight: 6, color: '#ffe082', lineHeight: 1
-          }}
+          style={{ background: 'none', border: 'none', fontSize: 30, cursor: 'pointer', marginRight: 6, color: '#ffe082', lineHeight: 1 }}
           onClick={() => navigate('/bet-history')}
           aria-label="Show Bet History"
         >
@@ -260,20 +273,20 @@ export default function TBGamePage() {
         </button>
       </div>
 
+      {/* Round + Timer */}
       <div className="tb-round-timer-row">
         <div className="tb-round">Round: #{currentRound}</div>
         <div className="tb-timer">⏱ {timer}s</div>
       </div>
 
+      {/* Grid */}
       <div className="tb-image-flex">
         {IMAGE_LIST.map((item) => (
           <div
             key={item.name}
             className={`tb-card ${highlighted.includes(item.name) ? 'selected' : ''} ${winnerChoice === item.name && showWinner ? 'winner' : ''}`}
             onClick={() => handleImageBet(item.name)}
-            style={{
-              cursor: timer <= 15 ? "not-allowed" : "pointer"
-            }}
+            style={{ cursor: timer <= 15 ? "not-allowed" : "pointer" }}
           >
             <img src={item.src} alt={EN_TO_HI[item.name] || item.name} />
             {!!userBets[item.name] && (
@@ -287,6 +300,7 @@ export default function TBGamePage() {
         ))}
       </div>
 
+      {/* Winner area */}
       <div className="tb-winner-popup-block">
         {!winnerChoice && timer <= 5 && <div className="tb-winner-pending">Status: Pending...</div>}
         {showWinner && winnerChoice && (
@@ -297,20 +311,14 @@ export default function TBGamePage() {
         )}
       </div>
 
+      {/* Win popup */}
       {winPopup.show && (
         <div className="tb-user-win-popup">
           <div>
             <img
               src={`/images/${winPopup.image}.png`}
               alt="winner"
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: 9,
-                border: '2px solid #ffd700',
-                marginBottom: 8,
-                boxShadow: '0 2px 12px #ffd70033'
-              }}
+              style={{ width: 42, height: 42, borderRadius: 9, border: '2px solid #ffd700', marginBottom: 8, boxShadow: '0 2px 12px #ffd70033' }}
             />
           </div>
           <div style={{ fontSize: '1.23rem', fontWeight: 900, color: '#ffd700', marginBottom: 6 }}>
@@ -322,11 +330,13 @@ export default function TBGamePage() {
         </div>
       )}
 
+      {/* Totals */}
       <div className="tb-total-bet-row">
         <span>Your Bet This Round: </span>
         <b>₹{userTotalBet}</b>
       </div>
 
+      {/* Coin select */}
       <div className="tb-coin-row">
         {COINS.map(val => (
           <button
@@ -347,6 +357,7 @@ export default function TBGamePage() {
         </button>
       )}
 
+      {/* Last wins modal */}
       <dialog id="tb-lastwin-modal" className="tb-lastwin-modal">
         <div className="tb-lastwin-modal-content">
           <h2 className="tb-lastwin-title">🏆 Last 10 Wins</h2>
