@@ -22,18 +22,25 @@ function createPooledPlayer(src, { volume = 1, loop = false, pool = 1 } = {}) {
       try { a.currentTime = 0; } catch {}
       a.play().catch(() => {});
     },
-    stop() { poolArr.forEach(a => { a.pause(); a.currentTime = 0; }); },
+    stop() {
+      poolArr.forEach(a => { a.pause(); a.currentTime = 0; });
+    },
     setVolume(v) { poolArr.forEach(a => (a.volume = v)); },
     _all() { return poolArr; }
   };
 }
 
+// players
 const bg = createPooledPlayer(bgSrc, { volume: 0.35, loop: true, pool: 1 });
 const coinPick = createPooledPlayer(coinPickSrc, { volume: 0.9, pool: 3 });
 const coinDrop = createPooledPlayer(coinDropSrc, { volume: 0.9, pool: 3 });
-const tick = createPooledPlayer(tickSrc, { volume: 0.75, pool: 4 });
+
+// ✅ TICK ko single instance rakha (pool:1) taaki overlap na ho
+const tick = createPooledPlayer(tickSrc, { volume: 0.75, pool: 1 });
+
 const winner = createPooledPlayer(winnerSrc, { volume: 0.95, pool: 1 });
 
+// states (default OFF if not set)
 let musicEnabled = (typeof window !== 'undefined' && localStorage.getItem('musicEnabled') === 'true') || false;
 let sfxEnabled   = (typeof window !== 'undefined' && localStorage.getItem('sfxEnabled') === 'true')   || false;
 
@@ -46,7 +53,7 @@ function persist() {
 function startBG() { if (musicEnabled) bg.play(); }
 function stopBG()  { bg.stop(); }
 
-// ⬇️ NEW: unlock all players on first user gesture
+// ⬇️ unlock all players on first user gesture
 let unlockedOnce = false;
 async function unlockAll() {
   if (unlockedOnce) return;
@@ -68,20 +75,26 @@ async function unlockAll() {
       a.volume = oldVol;
     } catch {}
   }
-  // after unlock, if music ON, start bg
   startBG();
 }
 
+// ✅ Helper to ensure tick never trails
+function stopTick() { tick.stop(); }
+
 export const SFX = {
   setMusicEnabled(val) { musicEnabled = !!val; persist(); musicEnabled ? startBG() : stopBG(); },
-  setSfxEnabled(val)   { sfxEnabled = !!val; persist(); if (!sfxEnabled) { coinPick.stop(); coinDrop.stop(); tick.stop(); winner.stop(); } },
+  setSfxEnabled(val)   { sfxEnabled = !!val; persist(); if (!sfxEnabled) { coinPick.stop(); coinDrop.stop(); stopTick(); winner.stop(); } },
   isMusicEnabled: () => musicEnabled,
   isSfxEnabled: () => sfxEnabled,
   unlockAll,
 
   startBG, stopBG,
+
+  // ✅ Tick: stop then play (no overlap), only if enabled
+  playTick: () => { if (!sfxEnabled) return; stopTick(); tick.play(); },
+  stopTick,
+
   playCoinPickup: () => sfxEnabled && coinPick.play(),
   playCoinDrop:   () => sfxEnabled && coinDrop.play(),
-  playTick:       () => sfxEnabled && tick.play(),
   playWinner:     () => sfxEnabled && winner.play(),
 };
