@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import api from '../services/api';
 import Loader from '../components/Loader';
 import '../styles/game.css';
+import { SFX } from '../utils/sounds'; // ✅ NEW: sound API
 
 const EN_TO_HI = {
   umbrella: 'छतरी', football: 'फुटबॉल', sun: 'सूरज', diya: 'दीया', cow: 'गाय', bucket: 'बाल्टी',
@@ -49,6 +50,17 @@ export default function TBGamePage() {
   const [loadingWins, setLoadingWins] = useState(true);
   const [winPopup, setWinPopup] = useState({ show: false, image: '', amount: 0 });
 
+  // ✅ NEW: SFX helpers
+  const prevSecRef = useRef(null);            // last second for tick
+  const winnerSoundRoundRef = useRef(null);   // to play winner sound once per round
+
+  // ✅ NEW: unlock all audio on first user gesture (even if side menu nahi khola)
+  useEffect(() => {
+    const unlock = () => SFX.unlockAll();
+    window.addEventListener('pointerdown', unlock, { once: true });
+    return () => window.removeEventListener('pointerdown', unlock);
+  }, []);
+
   useEffect(() => {
     let prevRound = -1;
     const fetchLiveState = async () => {
@@ -72,6 +84,8 @@ export default function TBGamePage() {
           setShowWinner(false);
           setHighlighted([]);
           setSelectedCoin(null);
+          // ✅ NEW: reset tick tracker for next round
+          prevSecRef.current = null;
         }
         prevRound = res.data.round;
       } catch {
@@ -147,13 +161,45 @@ export default function TBGamePage() {
     }
   }, [timer, winnerChoice]);
 
-  const handleCoinSelect = (value) => setSelectedCoin(value);
+  // ✅ NEW: Timer-based SFX (tick + winner)
+  useEffect(() => {
+    // SFX toggle check
+    if (!SFX.isSfxEnabled()) return;
+    if (typeof timer !== 'number') return;
+
+    // TICK from 15s down to 6s (play once per second)
+    if (timer <= 15 && timer >= 6) {
+      if (prevSecRef.current !== timer) {
+        SFX.playTick();
+        prevSecRef.current = timer;
+      }
+    } else {
+      prevSecRef.current = timer;
+    }
+
+    // WINNER sound exactly at 5s, only once per round
+    if (timer === 5 && currentRound) {
+      if (winnerSoundRoundRef.current !== currentRound) {
+        SFX.playWinner();
+        winnerSoundRoundRef.current = currentRound;
+      }
+    }
+  }, [timer, currentRound]);
+
+  const handleCoinSelect = (value) => {
+    setSelectedCoin(value);
+    // ✅ NEW: coin pickup sound on selecting coin value
+    if (SFX.isSfxEnabled()) SFX.playCoinPickup();
+  };
 
   // 🟢 INSTANT UI BET FUNCTION (Optimistic Update)
   const handleImageBet = async (name) => {
     if (!selectedCoin) return alert("Select a coin first!");
     if (timer <= 15) return alert('Betting closed for the last 15 seconds');
     if (balance < selectedCoin) return alert('Insufficient balance');
+
+    // ✅ NEW: coin drop sound when placing bet
+    if (SFX.isSfxEnabled()) SFX.playCoinDrop();
 
     setUserBets(prev => ({
       ...prev,
@@ -167,7 +213,7 @@ export default function TBGamePage() {
       await api.post('/bets/place-bet', { choice: name, amount: selectedCoin, round: currentRound }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Success: kuch nahi, UI already updated!
+      // Success: UI already updated
     } catch (e) {
       alert(e.response?.data?.message || 'Bet failed');
       setUserBets(prev => ({
@@ -175,7 +221,6 @@ export default function TBGamePage() {
         [name]: (prev[name] || 0) - selectedCoin
       }));
       setBalance(prev => prev + selectedCoin);
-      // backend sync
       try {
         const token = localStorage.getItem('token');
         const res = await api.get('/bets/live-state', {
