@@ -1,41 +1,67 @@
 import React from 'react';
 import '../styles/sidemenu.css';
+import SoundControls from './SoundControls';
 
 const SideMenu = ({ open, onClose, user, numbers }) => {
   if (!open) return null;
 
   return (
     <div className="sidemenu-overlay" onClick={onClose}>
-      <div className="sidemenu-drawer" onClick={e => e.stopPropagation()}>
+      <div
+        className="sidemenu-drawer"
+        onClick={e => e.stopPropagation()}
+        // bottom controls ke liye simple flex layout
+        style={{ display: 'flex', flexDirection: 'column' }}
+      >
         <button
           className="sidemenu-btn refer"
           onClick={() => window.location.href = '/referral'}
         >🎁 Refer & Earn ₹100</button>
- <button
-  className="sidemenu-btn"
-  onClick={() => window.location.href = `https://wa.me/${numbers.depositWhatsapp}?text=${encodeURIComponent(`I want to deposit. UserID: ${user.id}, Email: ${user.email}`)}`}
->
-  Deposit
-</button>
+
         <button
           className="sidemenu-btn"
-          onClick={() => window.location.href = `https://wa.me/${numbers.withdrawWhatsapp}?text=${encodeURIComponent(`I want to withdraw. UserID: ${user.id}, Email: ${user.email}`)}`}
-        >Withdraw</button>
+          onClick={() =>
+            window.location.href = `https://wa.me/${numbers.depositWhatsapp}?text=${encodeURIComponent(
+              `I want to deposit. UserID: ${user.id}, Email: ${user.email}`
+            )}`
+          }
+        >
+          Deposit
+        </button>
+
+        <button
+          className="sidemenu-btn"
+          onClick={() =>
+            window.location.href = `https://wa.me/${numbers.withdrawWhatsapp}?text=${encodeURIComponent(
+              `I want to withdraw. UserID: ${user.id}, Email: ${user.email}`
+            )}`
+          }
+        >
+          Withdraw
+        </button>
+
         <button
           className="sidemenu-btn logout"
           onClick={() => {
             localStorage.removeItem('token');
             window.location.href = '/login';
           }}
-        >Logout</button>
+        >
+          Logout
+        </button>
 
         <div className="sidemenu-tip">
           <div><b>TIP:</b></div>
           <div>
             डिपॉजिट: <b>₹100-₹10,000</b><br />
             विड्रॉल: <b>₹200-₹10,000</b><br />
-            WhatsApp support se बात करें for help.
+            WhatsApp support se बात करें for help Contact 7767080365 (message only).
           </div>
+        </div>
+
+        {/* ---- Bottom: Music + SFX toggles ---- */}
+        <div style={{ marginTop: 'auto', paddingTop: 10, borderTop: '1px solid #eee' }}>
+          <SoundControls />
         </div>
       </div>
     </div>
