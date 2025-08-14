@@ -1,5 +1,7 @@
+// src/App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
 import OtpVerify from './pages/OtpVerify';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
@@ -19,7 +21,6 @@ import BetHistoryPage from './pages/BetHistoryPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import DepositPage from './pages/DepositPage';
 
-
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [role, setRole] = useState(localStorage.getItem('role'));
@@ -31,43 +32,37 @@ function App() {
       if (newToken !== token) setToken(newToken);
       if (newRole !== role) setRole(newRole);
     }, 500);
-
     return () => clearInterval(interval);
   }, [token, role]);
 
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
+        {/* ---------- Public Auth/Utility Routes ---------- */}
         <Route path="/verify-otp" element={<OtpVerify />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* Root redirect based on role */}
-        <Route
-          path="/"
-          element={
-            token
-              ? (role === 'admin'
-                  ? <Navigate to="/admin" replace />
-                  : <Navigate to="/dashboard" replace />)
-              : <Navigate to="/signup" replace />
-          }
-        />
+        {/* ---------- NEW: Root shows TB game in public "view-only" mode ---------- */}
+        <Route path="/" element={<TBGamePage />} />
 
-        {/* User Protected Routes */}
+        {/* ---------- User Protected Routes ---------- */}
         <Route path="/dashboard" element={token ? <UserDashboard /> : <Navigate to="/login" replace />} />
-         <Route path="/leaderboard" element={token ? <LeaderboardPage /> : <Navigate to="/login" replace />} />
+        <Route path="/leaderboard" element={token ? <LeaderboardPage /> : <Navigate to="/login" replace />} />
         <Route path="/deposit" element={<DepositPage />} />
 
         <Route path="/bet-history" element={token ? <BetHistoryPage /> : <Navigate to="/login" replace />} />
         <Route path="/referral" element={token ? <ReferralPage /> : <Navigate to="/login" replace />} />
-        <Route path="/game/tb" element={token ? <TBGamePage /> : <Navigate to="/login" replace />} />
+
+        {/* ---------- TB is public now (view-only if not logged in) ---------- */}
+        <Route path="/game/tb" element={<TBGamePage />} />
+
+        {/* Spin game as before (kept protected) */}
         <Route path="/game/spin" element={token ? <SpinGamePage /> : <Navigate to="/login" replace />} />
 
-        {/* Admin Panel Protected Routes */}
+        {/* ---------- Admin Panel Protected Routes ---------- */}
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
         <Route path="/admin/whatsapp" element={<AdminRoute><WhatsappSettingsPage /></AdminRoute>} />
         <Route path="/admin/manage-user" element={<AdminRoute><ManageUserPage /></AdminRoute>} />
