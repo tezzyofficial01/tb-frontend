@@ -57,10 +57,42 @@ export default function TBGamePage() {
   const prevSecRef = useRef(null);
   const winnerSoundRoundRef = useRef(null);
 
+  // 🔊 Robust audio unlock (guest + authed)
+  const [needsUnlock, setNeedsUnlock] = useState(false);
   useEffect(() => {
-    const unlock = () => SFX.unlockAll();
-    window.addEventListener('pointerdown', unlock, { once: true });
-    return () => window.removeEventListener('pointerdown', unlock);
+    // attach retry-able unlock hooks (pointer/touch/keydown, visibility)
+    SFX.ensureUnlockHooks?.();
+
+    // initial banner state
+    const updateNeeds = () => {
+      if (SFX.isSfxEnabled?.()) {
+        setNeedsUnlock(!SFX.isUnlocked?.());
+      } else {
+        setNeedsUnlock(false);
+      }
+    };
+    updateNeeds();
+
+    // also attempt immediate unlock on first gesture
+    const tryUnlock = async () => {
+      const ok = await SFX.unlockAll?.();
+      if (ok) setNeedsUnlock(false);
+    };
+    window.addEventListener('pointerdown', tryUnlock, { once: true });
+    window.addEventListener('touchstart', tryUnlock, { once: true });
+    window.addEventListener('keydown', tryUnlock, { once: true });
+
+    const onVis = async () => {
+      if (document.visibilityState === 'visible' && SFX.isSfxEnabled?.()) {
+        const ok = await SFX.unlockAll?.();
+        if (ok) setNeedsUnlock(false);
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+    };
   }, []);
 
   const guard = (action) => {
@@ -103,7 +135,7 @@ export default function TBGamePage() {
           setSelectedCoin(null);
           prevSecRef.current = null;
           winnerSoundRoundRef.current = null;
-          SFX.stopTick();
+          SFX.stopTick?.();
         }
         prevRound = res.data.round;
       } catch {
@@ -124,7 +156,7 @@ export default function TBGamePage() {
     const interval = setInterval(fetchLiveState, 1000);
     return () => {
       clearInterval(interval);
-      SFX.stopTick();
+      SFX.stopTick?.();
     };
   }, [isAuthed]);
 
@@ -182,31 +214,33 @@ export default function TBGamePage() {
     }
   }, [timer, winnerChoice]);
 
+  // strict tick window (15..6)
   useEffect(() => {
-    if (!SFX.isSfxEnabled() || typeof timer !== 'number') return;
+    if (!SFX.isSfxEnabled?.() || typeof timer !== 'number') return;
     if (timer <= 5 || timer > 15) {
-      SFX.stopTick();
+      SFX.stopTick?.();
       prevSecRef.current = timer;
       return;
     }
     if (timer <= 15 && timer >= 6 && prevSecRef.current !== timer) {
-      SFX.playTick();
+      SFX.playTick?.();
       prevSecRef.current = timer;
     }
   }, [timer]);
 
+  // winner sound once per round @5s
   useEffect(() => {
-    if (!SFX.isSfxEnabled()) return;
+    if (!SFX.isSfxEnabled?.()) return;
     if (timer === 5 && currentRound && winnerSoundRoundRef.current !== currentRound) {
-      SFX.stopTick();
-      SFX.playWinner();
+      SFX.stopTick?.();
+      SFX.playWinner?.();
       winnerSoundRoundRef.current = currentRound;
     }
   }, [timer, currentRound]);
 
   const handleCoinSelect = (val) => guard(() => {
     setSelectedCoin(val);
-    if (SFX.isSfxEnabled()) SFX.playCoinPickup();
+    if (SFX.isSfxEnabled?.()) SFX.playCoinPickup?.();
   });
 
   const handleImageBet = async (name) => {
@@ -214,7 +248,7 @@ export default function TBGamePage() {
     if (!selectedCoin) return alert("Select a coin first!");
     if (timer <= 15) return alert('Betting closed');
     if (balance < selectedCoin) return alert('Insufficient balance');
-    if (SFX.isSfxEnabled()) SFX.playCoinDrop();
+    if (SFX.isSfxEnabled?.()) SFX.playCoinDrop?.();
     setUserBets(p => ({ ...p, [name]: (p[name] || 0) + selectedCoin }));
     setBalance(p => p - selectedCoin);
     setHighlighted(h => h.includes(name) ? h : [...h, name]);
@@ -236,9 +270,52 @@ export default function TBGamePage() {
 
   return (
     <div className="tb-game-root">
-      {!isAuthed && <div style={{ background: '#2d2d2d', color: '#ffd54f', padding: '10px 14px', borderRadius: 10, margin: '10px auto 6px', width: 'fit-content', fontWeight: 700 }}>Login/Signup to play. Viewing only.</div>}
+      {/* 🔊 If SFX ON but not unlocked yet (after refresh), prompt tap */}
+      {SFX.isSfxEnabled?.() && !SFX.isUnlocked?.() && (
+        <div
+          onClick={() => SFX.unlockAll?.().then(ok => ok && setNeedsUnlock(false))}
+          style={{
+            background: '#1f2937',
+            color: '#ffd54f',
+            padding: '10px 14px',
+            borderRadius: 10,
+            margin: '10px auto 6px',
+            width: 'fit-content',
+            fontWeight: 800,
+            cursor: 'pointer',
+            boxShadow: '0 0 0 2px #ffd54f22 inset'
+          }}
+          title="Tap to enable sound"
+        >
+          🔊 Tap to enable sound
+        </div>
+      )}
+
+      {/* Guest banner */}
+      {!isAuthed && (
+        <div style={{
+          background: '#2d2d2d',
+          color: '#ffd54f',
+          padding: '10px 14px',
+          borderRadius: 10,
+          margin: '10px auto 6px',
+          width: 'fit-content',
+          fontWeight: 700
+        }}>
+          Login/Signup to play. Viewing only.
+        </div>
+      )}
+
+      {/* Header */}
       <div className="tb-header-row">
-        <button className="tb-history-btn" style={{ background: 'none', border: 'none', fontSize: 30, cursor: 'pointer', marginRight: 6, color: '#ffe082', lineHeight: 1 }} onClick={() => guard(() => navigate('/bet-history'))}>📜</button>
+        <button
+          className="tb-history-btn"
+          style={{ background: 'none', border: 'none', fontSize: 30, cursor: 'pointer', marginRight: 6, color: '#ffe082', lineHeight: 1 }}
+          onClick={() => guard(() => navigate('/bet-history'))}
+          aria-label="Show Bet History"
+        >
+          📜
+        </button>
         <div className="tb-balance-row" onClick={() => !isAuthed && navigate('/signup')} style={{ cursor: !isAuthed ? 'pointer' : 'default' }}>
           <img src="/images/coin.png" alt="coin" className="tb-coin-icon" />
           <span>₹{isAuthed ? balance : 0}</span>
@@ -247,13 +324,22 @@ export default function TBGamePage() {
           <img src="/images/trophy.png" alt="last win" />
         </button>
       </div>
+
+      {/* Round + Timer */}
       <div className="tb-round-timer-row">
         <div className="tb-round">Round: #{currentRound}</div>
         <div className="tb-timer">⏱ {timer}s</div>
       </div>
+
+      {/* Grid */}
       <div className="tb-image-flex">
         {IMAGE_LIST.map((item) => (
-          <div key={item.name} className={`tb-card ${highlighted.includes(item.name) ? 'selected' : ''} ${winnerChoice === item.name && showWinner ? 'winner' : ''}`} onClick={() => (isAuthed ? handleImageBet(item.name) : navigate('/signup'))} style={{ cursor: (!isAuthed || timer <= 15) ? 'not-allowed' : 'pointer' }}>
+          <div
+            key={item.name}
+            className={`tb-card ${highlighted.includes(item.name) ? 'selected' : ''} ${winnerChoice === item.name && showWinner ? 'winner' : ''}`}
+            onClick={() => (isAuthed ? handleImageBet(item.name) : navigate('/signup'))}
+            style={{ cursor: (!isAuthed || timer <= 15) ? 'not-allowed' : 'pointer' }}
+          >
             <img src={item.src} alt={EN_TO_HI[item.name] || item.name} />
             {!!userBets[item.name] && (
               <div className="tb-card-coin">
@@ -265,6 +351,8 @@ export default function TBGamePage() {
           </div>
         ))}
       </div>
+
+      {/* Winner area */}
       <div className="tb-winner-popup-block">
         {!winnerChoice && timer <= 5 && <div className="tb-winner-pending">Status: Pending...</div>}
         {showWinner && winnerChoice && (
@@ -274,23 +362,53 @@ export default function TBGamePage() {
           </div>
         )}
       </div>
+
+      {/* Win popup (only authed users) */}
       {isAuthed && winPopup.show && (
         <div className="tb-user-win-popup">
-          <div><img src={`/images/${winPopup.image}.png`} alt="winner" style={{ width: 42, height: 42, borderRadius: 9, border: '2px solid #ffd700' }} /></div>
+          <div>
+            <img
+              src={`/images/${winPopup.image}.png`}
+              alt="winner"
+              style={{ width: 42, height: 42, borderRadius: 9, border: '2px solid #ffd700' }}
+            />
+          </div>
           <div>You won <span>₹{winPopup.amount}</span></div>
           <div>on <span>{EN_TO_HI[winPopup.image] || winPopup.image}</span>!</div>
         </div>
       )}
-      <div className="tb-total-bet-row"><span>Your Bet This Round: </span><b>₹{isAuthed ? userTotalBet : 0}</b></div>
+
+      {/* Totals */}
+      <div className="tb-total-bet-row">
+        <span>Your Bet This Round: </span>
+        <b>₹{isAuthed ? userTotalBet : 0}</b>
+      </div>
+
+      {/* Coin select */}
       <div className="tb-coin-row">
         {COINS.map(val => (
-          <button key={val} className={`tb-coin-btn ${selectedCoin === val ? 'selected' : ''}`} onClick={() => handleCoinSelect(val)} disabled={!isAuthed || timer <= 15}>
+          <button
+            key={val}
+            className={`tb-coin-btn ${selectedCoin === val ? 'selected' : ''}`}
+            onClick={() => handleCoinSelect(val)}
+            disabled={!isAuthed || timer <= 15}
+          >
             <img src="/images/coin.png" alt="coin" />
             <span>{val}</span>
           </button>
         ))}
       </div>
-      {selectedCoin && <button className="tb-coin-cancel-btn" onClick={() => guard(() => setSelectedCoin(null))}>Cancel Coin</button>}
+
+      {selectedCoin && (
+        <button
+          className="tb-coin-cancel-btn"
+          onClick={() => guard(() => setSelectedCoin(null))}
+        >
+          Cancel Coin
+        </button>
+      )}
+
+      {/* Last wins modal */}
       <dialog id="tb-lastwin-modal" className="tb-lastwin-modal">
         <div className="tb-lastwin-modal-content">
           <h2>🏆 Last 10 Wins</h2>
@@ -300,7 +418,9 @@ export default function TBGamePage() {
               return <li key={i}>Round {w.round || "-"}: {name}</li>;
             })}
           </ul>
-          <button onClick={() => document.getElementById('tb-lastwin-modal').close()}>Close</button>
+          <button onClick={() => document.getElementById('tb-lastwin-modal').close()}>
+            Close
+          </button>
         </div>
       </dialog>
     </div>
