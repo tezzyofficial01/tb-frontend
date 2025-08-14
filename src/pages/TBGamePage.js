@@ -270,26 +270,7 @@ export default function TBGamePage() {
 
   return (
     <div className="tb-game-root">
-      {/* 🔊 If SFX ON but not unlocked yet (after refresh), prompt tap */}
-      {SFX.isSfxEnabled?.() && !SFX.isUnlocked?.() && (
-        <div
-          onClick={() => SFX.unlockAll?.().then(ok => ok && setNeedsUnlock(false))}
-          style={{
-            background: '#1f2937',
-            color: '#ffd54f',
-            padding: '10px 14px',
-            borderRadius: 10,
-            margin: '10px auto 6px',
-            width: 'fit-content',
-            fontWeight: 800,
-            cursor: 'pointer',
-            boxShadow: '0 0 0 2px #ffd54f22 inset'
-          }}
-          title="Tap to enable sound"
-        >
-          🔊 Tap to enable sound
-        </div>
-      )}
+
 
       {/* Guest banner */}
       {!isAuthed && (
@@ -302,7 +283,7 @@ export default function TBGamePage() {
           width: 'fit-content',
           fontWeight: 700
         }}>
-          Login/Signup to play. Viewing only.
+          Login/Signup to play.
         </div>
       )}
 
