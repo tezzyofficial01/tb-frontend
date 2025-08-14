@@ -331,8 +331,9 @@ export default function TBGamePage() {
         </div>
         <button
           className="tb-last-win-btn"
-          onClick={() => guard(() => document.getElementById('tb-lastwin-modal').showModal())}
-          title={!isAuthed ? 'Signup required' : 'Last Wins'}
+          // ✅ PUBLIC: Last Wins modal guests ke liye bhi open
+          onClick={() => document.getElementById('tb-lastwin-modal').showModal()}
+          title="Last Wins"
         >
           <img src="/images/trophy.png" alt="last win" />
         </button>
