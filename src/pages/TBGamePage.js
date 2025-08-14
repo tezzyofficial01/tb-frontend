@@ -1,3 +1,4 @@
+// src/pages/TBGamePage.js
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
@@ -35,6 +36,10 @@ const COINS = [10, 20, 30, 40, 50, 100];
 
 export default function TBGamePage() {
   const navigate = useNavigate();
+
+  // 🔐 auth presence (token in localStorage = logged-in)
+  const isAuthed = !!localStorage.getItem('token');
+
   const [selectedCoin, setSelectedCoin] = useState(null);
   const [highlighted, setHighlighted] = useState([]);
   const [lastWins, setLastWins] = useState([]);
@@ -61,20 +66,41 @@ export default function TBGamePage() {
     return () => window.removeEventListener('pointerdown', unlock);
   }, []);
 
+  // 🔒 helper: any interactive click → signup if guest, else run action
+  const guard = (action) => {
+    if (!isAuthed) {
+      navigate('/signup');
+      return;
+    }
+    if (typeof action === 'function') action();
+  };
+
   useEffect(() => {
     let prevRound = -1;
+
     const fetchLiveState = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await api.get('/bets/live-state', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        let res;
+
+        // If logged-in → send auth header; else → public call without header
+        if (isAuthed) {
+          const token = localStorage.getItem('token');
+          res = await api.get('/bets/live-state', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } else {
+          res = await api.get('/bets/live-state'); // backend should return public bits
+        }
+
         setCurrentRound(res.data.round);
         setTimer(res.data.timer);
         setBets(res.data.totals || {});
         setWinnerChoice(res.data.winnerChoice || null);
-        setBalance(typeof res.data.balance === "number" ? res.data.balance : 0);
-        setUserBets(res.data.userBets || {});
+
+        // Only if authed, show personal stuff; else keep them blank
+        setBalance(isAuthed && typeof res.data.balance === "number" ? res.data.balance : 0);
+        setUserBets(isAuthed ? (res.data.userBets || {}) : {});
+
         setLoadingGame(false);
 
         if (prevRound !== -1 && prevRound !== res.data.round) {
@@ -90,12 +116,23 @@ export default function TBGamePage() {
           SFX.stopTick();
         }
         prevRound = res.data.round;
-      } catch {
+      } catch (err) {
+        // If authed but failed (e.g., 401), try once without header for public view
+        try {
+          const res = await api.get('/bets/live-state');
+          setCurrentRound(res.data.round);
+          setTimer(res.data.timer);
+          setBets(res.data.totals || {});
+          setWinnerChoice(res.data.winnerChoice || null);
+        } catch {
+          // ignore
+        }
         setUserBets({});
-        setBets({});
+        setBalance(0);
         setLoadingGame(false);
       }
     };
+
     fetchLiveState();
     const interval = setInterval(fetchLiveState, 1000);
     return () => {
@@ -103,7 +140,7 @@ export default function TBGamePage() {
       // ✅ unmount pe bhi tick band
       SFX.stopTick();
     };
-  }, []);
+  }, [isAuthed]);
 
   useEffect(() => {
     const fetchLastWins = async () => {
@@ -123,16 +160,19 @@ export default function TBGamePage() {
     };
   }, []);
 
+  // 🔒 guests should NOT hit server control endpoints
   useEffect(() => {
+    if (!isAuthed) return;
     if (timer === 10 && currentRound) {
       const token = localStorage.getItem('token');
       api.post('/bets/lock-winner', { round: currentRound }, {
         headers: { Authorization: `Bearer ${token}` }
       }).catch(() => {});
     }
-  }, [timer, currentRound]);
+  }, [timer, currentRound, isAuthed]);
 
   useEffect(() => {
+    if (!isAuthed) return;
     if (timer === 5 && currentRound) {
       const token = localStorage.getItem('token');
       api.post('/bets/announce-winner', { round: currentRound }, {
@@ -147,7 +187,7 @@ export default function TBGamePage() {
         }, 5000);
       }
     }
-  }, [timer, currentRound, winnerChoice, userBets]);
+  }, [timer, currentRound, winnerChoice, userBets, isAuthed]);
 
   useEffect(() => {
     const winnerAnnounceHandler = ({ round, choice }) => {
@@ -205,12 +245,16 @@ export default function TBGamePage() {
   }, [timer, currentRound]);
 
   const handleCoinSelect = (value) => {
-    setSelectedCoin(value);
-    if (SFX.isSfxEnabled()) SFX.playCoinPickup();
+    guard(() => {
+      setSelectedCoin(value);
+      if (SFX.isSfxEnabled()) SFX.playCoinPickup();
+    });
   };
 
   // Optimistic bet
   const handleImageBet = async (name) => {
+    if (!isAuthed) return navigate('/signup');
+
     if (!selectedCoin) return alert("Select a coin first!");
     if (timer <= 15) return alert('Betting closed for the last 15 seconds');
     if (balance < selectedCoin) return alert('Insufficient balance');
@@ -253,22 +297,43 @@ export default function TBGamePage() {
 
   return (
     <div className="tb-game-root">
-      {/* ...UI same as your version (no visual changes)... */}
+      {/* 🔔 Guest banner */}
+      {!isAuthed && (
+        <div
+          style={{
+            background: '#2d2d2d',
+            color: '#ffd54f',
+            padding: '10px 14px',
+            borderRadius: 10,
+            margin: '10px auto 6px',
+            width: 'fit-content',
+            fontWeight: 700
+          }}
+        >
+          Login/Signup to play. Viewing only.
+        </div>
+      )}
+
       {/* Header */}
       <div className="tb-header-row">
         <button
           className="tb-history-btn"
           style={{ background: 'none', border: 'none', fontSize: 30, cursor: 'pointer', marginRight: 6, color: '#ffe082', lineHeight: 1 }}
-          onClick={() => navigate('/bet-history')}
+          onClick={() => guard(() => navigate('/bet-history'))}
           aria-label="Show Bet History"
+          title={!isAuthed ? 'Signup required' : 'Bet History'}
         >
           📜
         </button>
-        <div className="tb-balance-row">
+        <div className="tb-balance-row" onClick={() => !isAuthed && navigate('/signup')} style={{ cursor: !isAuthed ? 'pointer' : 'default' }}>
           <img src="/images/coin.png" alt="coin" className="tb-coin-icon" />
-          <span>₹{balance}</span>
+          <span>₹{isAuthed ? balance : 0}</span>
         </div>
-        <button className="tb-last-win-btn" onClick={() => document.getElementById('tb-lastwin-modal').showModal()}>
+        <button
+          className="tb-last-win-btn"
+          onClick={() => guard(() => document.getElementById('tb-lastwin-modal').showModal())}
+          title={!isAuthed ? 'Signup required' : 'Last Wins'}
+        >
           <img src="/images/trophy.png" alt="last win" />
         </button>
       </div>
@@ -285,8 +350,9 @@ export default function TBGamePage() {
           <div
             key={item.name}
             className={`tb-card ${highlighted.includes(item.name) ? 'selected' : ''} ${winnerChoice === item.name && showWinner ? 'winner' : ''}`}
-            onClick={() => handleImageBet(item.name)}
-            style={{ cursor: timer <= 15 ? "not-allowed" : "pointer" }}
+            onClick={() => (isAuthed ? handleImageBet(item.name) : navigate('/signup'))}
+            style={{ cursor: (!isAuthed || timer <= 15) ? 'not-allowed' : 'pointer' }}
+            title={!isAuthed ? 'Signup required' : (timer <= 15 ? 'Betting closed' : 'Place bet')}
           >
             <img src={item.src} alt={EN_TO_HI[item.name] || item.name} />
             {!!userBets[item.name] && (
@@ -311,8 +377,8 @@ export default function TBGamePage() {
         )}
       </div>
 
-      {/* Win popup */}
-      {winPopup.show && (
+      {/* Win popup (only for authed users) */}
+      {isAuthed && winPopup.show && (
         <div className="tb-user-win-popup">
           <div>
             <img
@@ -333,7 +399,7 @@ export default function TBGamePage() {
       {/* Totals */}
       <div className="tb-total-bet-row">
         <span>Your Bet This Round: </span>
-        <b>₹{userTotalBet}</b>
+        <b>₹{isAuthed ? userTotalBet : 0}</b>
       </div>
 
       {/* Coin select */}
@@ -343,7 +409,8 @@ export default function TBGamePage() {
             key={val}
             className={`tb-coin-btn ${selectedCoin === val ? 'selected' : ''}`}
             onClick={() => handleCoinSelect(val)}
-            disabled={timer <= 15}
+            disabled={!isAuthed || timer <= 15}
+            title={!isAuthed ? 'Signup required' : (timer <= 15 ? 'Betting closed' : 'Select coin')}
           >
             <img src="/images/coin.png" alt="coin" />
             <span>{val}</span>
@@ -352,7 +419,11 @@ export default function TBGamePage() {
       </div>
 
       {selectedCoin && (
-        <button className="tb-coin-cancel-btn" onClick={() => setSelectedCoin(null)}>
+        <button
+          className="tb-coin-cancel-btn"
+          onClick={() => guard(() => setSelectedCoin(null))}
+          title={!isAuthed ? 'Signup required' : 'Cancel coin'}
+        >
           Cancel Coin
         </button>
       )}
@@ -374,7 +445,10 @@ export default function TBGamePage() {
               );
             })}
           </ul>
-          <button className="tb-lastwin-close-btn" onClick={() => document.getElementById('tb-lastwin-modal').close()}>
+          <button
+            className="tb-lastwin-close-btn"
+            onClick={() => document.getElementById('tb-lastwin-modal').close()}
+          >
             Close
           </button>
         </div>
