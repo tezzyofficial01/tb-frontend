@@ -25,6 +25,7 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [role, setRole] = useState(localStorage.getItem('role'));
 
+  // Polling (as you already had)
   useEffect(() => {
     const interval = setInterval(() => {
       const newToken = localStorage.getItem('token');
@@ -34,6 +35,16 @@ function App() {
     }, 500);
     return () => clearInterval(interval);
   }, [token, role]);
+
+  // OPTIONAL: react to changes from other tabs/windows instantly
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'token') setToken(localStorage.getItem('token'));
+      if (e.key === 'role') setRole(localStorage.getItem('role'));
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   return (
     <Router>
@@ -45,21 +56,22 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* ---------- NEW: Root shows TB game in public "view-only" mode ---------- */}
+        {/* ---------- Root shows TB game in public "view-only" mode ---------- */}
         <Route path="/" element={<TBGamePage />} />
 
         {/* ---------- User Protected Routes ---------- */}
         <Route path="/dashboard" element={token ? <UserDashboard /> : <Navigate to="/login" replace />} />
         <Route path="/leaderboard" element={token ? <LeaderboardPage /> : <Navigate to="/login" replace />} />
+        {/* Deposit currently public as per your file. If you want it protected, wrap like others. */}
         <Route path="/deposit" element={<DepositPage />} />
 
         <Route path="/bet-history" element={token ? <BetHistoryPage /> : <Navigate to="/login" replace />} />
         <Route path="/referral" element={token ? <ReferralPage /> : <Navigate to="/login" replace />} />
 
-        {/* ---------- TB is public now (view-only if not logged in) ---------- */}
+        {/* ---------- TB is public (view-only if not logged in) ---------- */}
         <Route path="/game/tb" element={<TBGamePage />} />
 
-        {/* Spin game as before (kept protected) */}
+        {/* Spin game kept protected (as before) */}
         <Route path="/game/spin" element={token ? <SpinGamePage /> : <Navigate to="/login" replace />} />
 
         {/* ---------- Admin Panel Protected Routes ---------- */}
@@ -68,6 +80,9 @@ function App() {
         <Route path="/admin/manage-user" element={<AdminRoute><ManageUserPage /></AdminRoute>} />
         <Route path="/admin/summary" element={<AdminRoute><AdminRoundsSummary /></AdminRoute>} />
         <Route path="/admin/spin-winner" element={<AdminRoute><SpinWinnerAdmin /></AdminRoute>} />
+
+        {/* OPTIONAL: Wildcard fallback to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
